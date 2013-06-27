@@ -4,6 +4,13 @@ import time
 import urllib
 from xml.dom.minidom import parse
 
+# Program execution flow:
+#  1) setup_tc_data(): create db tables
+#  2a) fetch_round_list(): download the round_list xml, call load
+#  2b) load_round_list(): load round_list into db
+#  3a) fetch_round_results(): download all round_results xmls, call load
+#  3b) load_round_results(): load round_reounds into db
+
 log = logging.getLogger("etl")
 
 base_url = "http://community.topcoder.com/tc?module=BasicData"
@@ -13,16 +20,18 @@ round_results_url = base_url + "&c=dd_round_results&rd={0}"
 round_results_file = "round_results_{0}.xml"
 tc_data_sql = "tc_data.db"
 
-round_list_desc = [
+round_list_desc = sorted([
   ("round_id", "integer"),
   ("full_name", "text"),
   ("short_name", "text"),
   ("round_type_desc", "text"),
   ("date", "text")
-]
+])
+round_list_keys = [r[0] for r in round_list_desc]
 round_list_table = "CREATE TABLE rounds (" + \
-    ",".join([" ".join(field) for field in sorted(round_list_desc)]) + ")"
-round_results_desc = [
+    ",".join([" ".join(field) for field in round_list_desc]) + ")"
+
+round_results_desc = sorted([
   ("room_id", "integer"),
   ("room_name", "text"),
   ("coder_id", "integer"),
@@ -76,9 +85,10 @@ round_results_desc = [
   ("level_three_time_elapsed", "integer"),
   ("level_three_placed", "integer"),
   ("level_three_language", "text")
-]
+])
+round_results_keys = [r[0] for r in round_results_desc]
 round_results_table = "CREATE TABLE results_{0} (" + \
-    ",".join([" ".join(field) for field in sorted(round_results_desc)]) + ")"
+    ",".join([" ".join(field) for field in round_results_desc]) + ")"
 
 conn = sqlite3.connect(tc_data_sql)
 cursor = conn.cursor()
@@ -102,9 +112,12 @@ def fetch_feeds(to_fetch):
   fetched = []
   for (url, filename) in to_fetch:
     time.sleep(1) # throttle fetches to prevent flooding TC server
-    log.debug("Fetching " + url + " to local file " + filename)
+    log.debug("Fetching %s to local file %s" % (url, filename))
     fetched.append(filename)
-    (_, headers) = urllib.urlretrieve(url, filename)
+    try:
+      (_, headers) = urllib.urlretrieve(url, filename)
+    except:
+      log.error("Caught error while fetching %s" % url)
   return fetched
 
 def fetch_round_list():
@@ -117,25 +130,31 @@ def fetch_round_results(round_ids):
       round_results_file.format(rid)) for rid in round_ids])
   load_round_results(fetched)
 
-def load_files(to_load):
+def load_files(to_load, expected_keys):
   for (filename, sql) in to_load:
+    log.debug("Loading %s into db" % filename)
     feed_dom = parse(filename)
     data = []
     for row in feed_dom.getElementsByTagName("row"):
       data.append(read_row(row))
     for i in xrange(len(data)):
-      data[i] = [data[i][x] for x in sorted(data[i].keys())]
+      # TODO validate data keys
+      keys = sorted(data[i].keys())
+      if keys == expected_keys:
+        data[i] = [data[i][x] for x in keys]
+      else:
+        log.error("%s does not match expected schema, skipping" % filename)
     cursor.executemany(sql, data)
 
 def load_round_list():
   field_ct = len(round_list_desc)
   insert_sql = "INSERT INTO rounds VALUES (" + \
       ",".join("?" * field_ct) + ")"
-  load_files([(round_list_file, insert_sql)])
+  load_files([(round_list_file, insert_sql)], round_list_keys)
 
 def load_round_results(round_ids):
   field_ct = len(round_results_desc)
   insert_sql = "INSERT INTO results_{0} VALUES (" + \
       ",".join("?" * field_ct) + ")"
   load_files([(round_results_file.format(rid), insert_sql.format(rid)) \
-      for rid in round_ids])
+      for rid in round_ids], round_results_keys)
