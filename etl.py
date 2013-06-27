@@ -144,6 +144,7 @@ def load_files(to_load, expected_keys):
       else:
         log.error("%s does not match expected schema, skipping" % filename)
     cursor.executemany(sql, data)
+  conn.commit()
 
 def load_round_list():
   field_ct = len(round_list_desc)

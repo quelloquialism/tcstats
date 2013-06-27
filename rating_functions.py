@@ -1,5 +1,11 @@
 #!/usr/bin/python
 
+def as_of():
+  # TODO this is probably getting the first date, not last
+  # check the date fmt and what ORDER BY means?
+  last_round_sql = "SELECT short_name FROM rounds LIMIT 1 ORDER BY date"
+  return cursor.execute(last_round_sql).fetchone()
+
 pname = {1: "Easy", 2: "Medium", 3: "Hard"}
 
 def ordinal(i):
@@ -92,4 +98,3 @@ def get_round_accomplishments(coder, limit):
   return [] # TODO
 
 # TODO PvPetr
-# TODO AsOf (return name of last SRM in db)
