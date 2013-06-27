@@ -95,7 +95,6 @@ cursor = conn.cursor()
 
 def setup_tc_data():
   cursor.execute(round_list_table)
-  cursor.execute(round_results_table)
 
 def read_row(row):
   row_data = {}
@@ -153,6 +152,8 @@ def load_round_list():
   load_files([(round_list_file, insert_sql)], round_list_keys)
 
 def load_round_results(round_ids):
+  for rid in round_ids:
+    cursor.execute(round_results_table % rid)
   field_ct = len(round_results_desc)
   insert_sql = "INSERT INTO results_{0} VALUES (" + \
       ",".join("?" * field_ct) + ")"
