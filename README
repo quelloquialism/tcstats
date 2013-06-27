@@ -1,0 +1,10 @@
+TCStats, random stats about competitors in TopCoder's Algorithm contests.
+Originally written in VB.Net by jmzero.
+
+Warning: probably none of the code works yet, I'm doing the dev work without
+internet access so I can't test/look up docs.
+
+Looking at using Python 2.6/2.7 serving as a Flask app.
+urllib for feed retrieval
+minidom for feed parsing
+sqlite3 for data storage
