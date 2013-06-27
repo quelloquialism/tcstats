@@ -86,7 +86,6 @@ cursor = conn.cursor()
 def setup_tc_data():
   cursor.execute(round_list_table)
   cursor.execute(round_results_table)
-  # members table for coder-by-coder stats?
 
 def read_row(row):
   row_data = {}
@@ -114,8 +113,8 @@ def fetch_round_list():
     load_round_list()
 
 def fetch_round_results(round_ids):
-  fetched = fetch_feeds([(round_results_url.format(id), \
-      round_results_file.format(id)) for id in round_ids])
+  fetched = fetch_feeds([(round_results_url.format(rid), \
+      round_results_file.format(rid)) for rid in round_ids])
   load_round_results(fetched)
 
 def load_files(to_load):
@@ -138,5 +137,5 @@ def load_round_results(round_ids):
   field_ct = len(round_results_desc)
   insert_sql = "INSERT INTO results_{0} VALUES (" + \
       ",".join("?" * field_ct) + ")"
-  load_files([(round_results_file.format(id), insert_sql.format(id)) \
-      for id in round_ids])
+  load_files([(round_results_file.format(rid), insert_sql.format(rid)) \
+      for rid in round_ids])
