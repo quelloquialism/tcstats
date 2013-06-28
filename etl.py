@@ -21,7 +21,7 @@ round_results_file = "round_results_{0}.xml"
 tc_data_sql = "tc_data.db"
 
 round_list_desc = sorted([
-  ("round_id", "integer"),
+  ("round_id", "integer", "primary key"),
   ("full_name", "text"),
   ("short_name", "text"),
   ("round_type_desc", "text"),
@@ -34,7 +34,7 @@ round_list_table = "CREATE TABLE rounds (" + \
 round_results_desc = sorted([
   ("room_id", "integer"),
   ("room_name", "text"),
-  ("coder_id", "integer"),
+  ("coder_id", "integer", "primary key"),
   ("handle", "text"),
   ("paid", "text"),
   ("old_rating", "integer"),
