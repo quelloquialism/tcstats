@@ -13,12 +13,12 @@ from xml.dom.minidom import parse
 
 log = logging.getLogger("etl")
 
+tc_data_sql = "tc_data.db"
 base_url = "http://community.topcoder.com/tc?module=BasicData"
 round_list_url = base_url + "&c=dd_round_list"
 round_list_file = "round_list.xml"
 round_results_url = base_url + "&c=dd_round_results&rd={0}"
 round_results_file = "round_results_{0}.xml"
-tc_data_sql = "tc_data.db"
 
 round_list_desc = sorted([
   ("round_id", "integer", "primary key"),
