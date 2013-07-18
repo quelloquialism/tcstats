@@ -7,7 +7,7 @@ app = Flask(__name__)
 # TODO actually use config settings, right now things are hardcoded
 #app.config.from_envvar("TCSTATS_SETTINGS", silent=True)
 
-def get_db_conn()
+def get_db_conn():
   return None
 
 @app.before_request
