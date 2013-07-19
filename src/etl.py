@@ -29,7 +29,7 @@ round_list_desc = sorted([
   ("date", "text")
 ])
 round_list_keys = [r[0] for r in round_list_desc]
-round_list_table = "CREATE TABLE rounds (" + \
+round_list_table = "CREATE TABLE IF NOT EXISTS rounds (" + \
     ",".join([" ".join(field) for field in round_list_desc]) + ")"
 
 round_results_desc = sorted([
@@ -88,7 +88,7 @@ round_results_desc = sorted([
   ("level_three_language", "text")
 ])
 round_results_keys = [r[0] for r in round_results_desc]
-round_results_table = "CREATE TABLE results_{0} (" + \
+round_results_table = "CREATE TABLE IF NOT EXISTS results_{0} (" + \
     ",".join([" ".join(field) for field in round_results_desc]) + ")"
 
 conn = sqlite3.connect(config["SQL_DB"])
@@ -146,6 +146,7 @@ def load_files(to_load, expected_keys):
 def load_round_list():
   cursor.execute(round_list_table)
   field_ct = len(round_list_desc)
+  # TODO this breaks after 1st pass since pkey is not unique (upsert?)
   insert_sql = "INSERT INTO rounds VALUES (" + \
       ",".join("?" * field_ct) + ")"
   load_files([(config["ROUND_LIST_FILE"], insert_sql)], round_list_keys)
@@ -154,7 +155,13 @@ def load_round_results(round_ids):
   for rid in round_ids:
     cursor.execute(round_results_table % rid)
   field_ct = len(round_results_desc)
+  # TODO this breaks after 1st pass since pkey is not unique (upsert?)
   insert_sql = "INSERT INTO results_{0} VALUES (" + \
       ",".join("?" * field_ct) + ")"
   load_files([(config["ROUND_RESULTS_FILE"].format(rid), \
       insert_sql.format(rid)) for rid in round_ids], round_results_keys)
+
+def full_run():
+  fetch_round_list()
+  round_ids = [row[0] for row in cursor.execute("SELECT round_id FROM rounds")]
+  fetch_round_results(round_ids)
