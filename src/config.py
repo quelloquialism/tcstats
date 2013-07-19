@@ -5,6 +5,6 @@ LOG_BACKUPS = 365
 SQL_DB = "tc_data.db"
 STATS_URL = "http://community.topcoder.com/tc?module=BasicData"
 ROUND_LIST_URL = STATS_URL + "&c=dd_round_list"
-ROUND_LIST_FILE = "round_list.xml"
+ROUND_LIST_FILE = "/tmp/round_list.xml"
 ROUND_RESULTS_URL = STATS_URL + "&c=dd_round_results&rd={0}"
-ROUND_RESULTS_FILE = "round_results_{0}.xml"
+ROUND_RESULTS_FILE = "/tmp/round_results_{0}.xml"
