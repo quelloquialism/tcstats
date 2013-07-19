@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
 def as_of():
-  # TODO this is probably getting the first date, not last
-  # check the date fmt and what ORDER BY means?
-  last_round_sql = "SELECT short_name FROM rounds LIMIT 1 ORDER BY date"
-  return cursor.execute(last_round_sql).fetchone()
+  last_round_sql = \
+      "SELECT short_name, date FROM rounds ORDER BY date DESC LIMIT 1"
+  name, date = cursor.execute(last_round_sql).fetchone()
+  return "%s (%s)" % (name, date)
 
 pname = {1: "Easy", 2: "Medium", 3: "Hard"}
 
