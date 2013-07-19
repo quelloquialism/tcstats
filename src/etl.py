@@ -146,8 +146,7 @@ def load_files(to_load, expected_keys):
 def load_round_list():
   cursor.execute(round_list_table)
   field_ct = len(round_list_desc)
-  # TODO this breaks after 1st pass since pkey is not unique (upsert?)
-  insert_sql = "INSERT INTO rounds VALUES (" + \
+  insert_sql = "REPLACE INTO rounds VALUES (" + \
       ",".join("?" * field_ct) + ")"
   load_files([(config["ROUND_LIST_FILE"], insert_sql)], round_list_keys)
 
@@ -155,8 +154,7 @@ def load_round_results(round_ids):
   for rid in round_ids:
     cursor.execute(round_results_table % rid)
   field_ct = len(round_results_desc)
-  # TODO this breaks after 1st pass since pkey is not unique (upsert?)
-  insert_sql = "INSERT INTO results_{0} VALUES (" + \
+  insert_sql = "REPLACE INTO results_{0} VALUES (" + \
       ",".join("?" * field_ct) + ")"
   load_files([(config["ROUND_RESULTS_FILE"].format(rid), \
       insert_sql.format(rid)) for rid in round_ids], round_results_keys)
