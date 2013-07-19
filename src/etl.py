@@ -15,9 +15,8 @@ from xml.dom.minidom import parse
 #  2b) load_round_results(): load round_reounds into db
 
 # TODO who does log dir creation? also make sure permissions allow this
-# TODO what does "when" actually mean? i guess "h" is hour "d" is day?
 log_fhandler = TimedRotatingFileHandler(config["LOG_DIR"] + "/etl", \
-    backupCount=config["LOG_BACKUPS"], when="d", interval=1, utc=True)
+    backupCount=config["LOG_BACKUPS"], when="midnight", interval=1, utc=True)
 log_fhandler.setLevel(logging.DEBUG)
 log = logging.getLogger("etl")
 log.addHandler(log_fhandler)
