@@ -50,3 +50,11 @@ def calc_new_rating_vol(user, rank, played, coders):
   new_vol = math.sqrt((new_rating - rating)**2 / weight + vol**2 / \
       (weight + 1))
   return (new_rating, new_vol)
+
+def iterated_perf_as(user, rank, played, coders, iterations=30, rating=1200):
+  # TODO check this stuff with jmzero (vol value? is rating change supposed
+  #   to be capped? am i supposed to assume played=0 also?)
+  fixed_vol = 337
+  for i in range(iterations):
+    rating, _ = calc_new_rating_vol((rating, fixed_vol), rank, played, coders)
+  return rating
