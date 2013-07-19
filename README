@@ -1,10 +1,15 @@
 TCStats, random stats about competitors in TopCoder's Algorithm contests.
 Originally written in VB.Net by jmzero.
 
-Warning: probably none of the code works yet, I'm doing the dev work without
-internet access so I can't test/look up docs.
+Environment:
+Debian 6.0.7, 2.6.32-5-amd64 (probably works on other flavors as well, possibly
+  with config tweaks)
+Python 2.6.6 (probably works on most 2.6.x/2.7.x versions)
+Flask 0.10.1 (with Jinja 2.7 and Werkzeug 0.9.1)
 
-Looking at using Python 2.6/2.7 serving as a Flask app.
-urllib for feed retrieval
-minidom for feed parsing
-sqlite3 for data storage
+To run:
+- install python 2.6/2.7
+- install pip
+- use pip to install flask
+- run "python tcstats.py" in the src directory
+This should start up the flask app on http://localhost:5000/.
