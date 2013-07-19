@@ -1,3 +1,6 @@
+from tcstats import app
+config = app.config
+
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import sqlite3
@@ -6,27 +9,18 @@ import urllib
 from xml.dom.minidom import parse
 
 # Program execution flow:
-#  1) setup_tc_data(): create db tables
-#  2a) fetch_round_list(): download the round_list xml, call load
-#  2b) load_round_list(): load round_list into db
-#  3a) fetch_round_results(): download all round_results xmls, call load
-#  3b) load_round_results(): load round_reounds into db
+#  1a) fetch_round_list(): download the round_list xml, call load
+#  1b) load_round_list(): load round_list into db
+#  2a) fetch_round_results(): download all round_results xmls, call load
+#  2b) load_round_results(): load round_reounds into db
 
-# TODO backup count, file dir, log level should all be configurable
 # TODO who does log dir creation? also make sure permissions allow this
-log_fhandler = TimedRotatingFileHandler("/var/log/tcstats/tcstats-etl", \
-    backupCount=365, when='h', interval=1, utc=True)
+# TODO what does "when" actually mean? i guess "h" is hour "d" is day?
+log_fhandler = TimedRotatingFileHandler(config["LOG_DIR"] + "/etl", \
+    backupCount=config["LOG_BACKUPS"], when="d", interval=1, utc=True)
 log_fhandler.setLevel(logging.DEBUG)
 log = logging.getLogger("etl")
 log.addHandler(log_fhandler)
-
-# TODO all of this should be in a config file
-tc_data_sql = "tc_data.db"
-base_url = "http://community.topcoder.com/tc?module=BasicData"
-round_list_url = base_url + "&c=dd_round_list"
-round_list_file = "round_list.xml"
-round_results_url = base_url + "&c=dd_round_results&rd={0}"
-round_results_file = "round_results_{0}.xml"
 
 round_list_desc = sorted([
   ("round_id", "integer", "primary key"),
@@ -98,11 +92,8 @@ round_results_keys = [r[0] for r in round_results_desc]
 round_results_table = "CREATE TABLE results_{0} (" + \
     ",".join([" ".join(field) for field in round_results_desc]) + ")"
 
-conn = sqlite3.connect(tc_data_sql)
+conn = sqlite3.connect(config["SQL_DB"])
 cursor = conn.cursor()
-
-def setup_tc_data():
-  cursor.execute(round_list_table)
 
 def read_row(row):
   row_data = {}
@@ -128,13 +119,13 @@ def fetch_feeds(to_fetch):
   return fetched
 
 def fetch_round_list():
-  fetched = fetch_feeds([(round_list_url, round_list_file)])
+  fetched = fetch_feeds([(config["ROUND_LIST_URL"], config["ROUND_LIST_FILE"])])
   if len(fetched) > 0:
     load_round_list()
 
 def fetch_round_results(round_ids):
-  fetched = fetch_feeds([(round_results_url.format(rid), \
-      round_results_file.format(rid)) for rid in round_ids])
+  fetched = fetch_feeds([(config["ROUND_RESULTS_URL"].format(rid), \
+      config["ROUND_RESULTS_FILE"].format(rid)) for rid in round_ids])
   load_round_results(fetched)
 
 def load_files(to_load, expected_keys):
@@ -154,10 +145,11 @@ def load_files(to_load, expected_keys):
   conn.commit()
 
 def load_round_list():
+  cursor.execute(round_list_table)
   field_ct = len(round_list_desc)
   insert_sql = "INSERT INTO rounds VALUES (" + \
       ",".join("?" * field_ct) + ")"
-  load_files([(round_list_file, insert_sql)], round_list_keys)
+  load_files([(config["ROUND_LIST_FILE"], insert_sql)], round_list_keys)
 
 def load_round_results(round_ids):
   for rid in round_ids:
@@ -165,5 +157,5 @@ def load_round_results(round_ids):
   field_ct = len(round_results_desc)
   insert_sql = "INSERT INTO results_{0} VALUES (" + \
       ",".join("?" * field_ct) + ")"
-  load_files([(round_results_file.format(rid), insert_sql.format(rid)) \
-      for rid in round_ids], round_results_keys)
+  load_files([(config["ROUND_RESULTS_FILE"].format(rid), \
+      insert_sql.format(rid)) for rid in round_ids], round_results_keys)

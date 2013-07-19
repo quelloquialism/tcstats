@@ -4,8 +4,8 @@ from flask import Flask, g, render_template, url_for
 from flask import request, session, redirect, abort, flash
 
 app = Flask(__name__)
-# TODO actually use config settings, right now things are hardcoded
-#app.config.from_envvar("TCSTATS_SETTINGS", silent=True)
+app.config.from_object("config")
+app.config.from_envvar("TCSTATS_SETTINGS", silent=True)
 
 def get_db_conn():
   return None
