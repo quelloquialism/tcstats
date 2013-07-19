@@ -1,4 +1,5 @@
 import logging
+from logging.handlers import TimedRotatingFileHandler
 import sqlite3
 import time
 import urllib
@@ -11,8 +12,15 @@ from xml.dom.minidom import parse
 #  3a) fetch_round_results(): download all round_results xmls, call load
 #  3b) load_round_results(): load round_reounds into db
 
+# TODO backup count, file dir, log level should all be configurable
+# TODO who does log dir creation? also make sure permissions allow this
+log_fhandler = TimedRotatingFileHandler("/var/log/tcstats/tcstats-etl", \
+    backupCount=365, when='h', interval=1, utc=True)
+log_fhandler.setLevel(logging.DEBUG)
 log = logging.getLogger("etl")
+log.addHandler(log_fhandler)
 
+# TODO all of this should be in a config file
 tc_data_sql = "tc_data.db"
 base_url = "http://community.topcoder.com/tc?module=BasicData"
 round_list_url = base_url + "&c=dd_round_list"
@@ -137,7 +145,6 @@ def load_files(to_load, expected_keys):
     for row in feed_dom.getElementsByTagName("row"):
       data.append(read_row(row))
     for i in xrange(len(data)):
-      # TODO validate data keys
       keys = sorted(data[i].keys())
       if keys == expected_keys:
         data[i] = [data[i][x] for x in keys]
