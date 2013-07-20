@@ -152,7 +152,8 @@ def load_round_list():
 
 def load_round_results(round_ids):
   for rid in round_ids:
-    cursor.execute(round_results_table % rid)
+    # TODO sigh. which style is preferred, "{0}".format(blah) or "%s" % blah?
+    cursor.execute(round_results_table.format(rid))
   field_ct = len(round_results_desc)
   insert_sql = "REPLACE INTO results_{0} VALUES (" + \
       ",".join("?" * field_ct) + ")"
