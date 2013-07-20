@@ -4,5 +4,13 @@
   <form action="{{ url_for('query_handle') }}" method="get">
     <p>Enter a TopCoder handle: <input type="text" size="30" name="handle"></p>
   </form>
+  <p>Coder id (from results_50) for {{ handle }} is {{ cid }}. Rating changed from {{ old_rating }} to {{ new_rating }} during this match.</p>
+  <ul>
+  {% for text in dummy %}
+    <li>{{ text }}</li>
+  {% else %}
+    <li>None.</li>
+  {% endfor %}
+  </ul>
 </div>
 {% endblock %}
