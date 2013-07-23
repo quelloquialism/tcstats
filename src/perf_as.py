@@ -22,6 +22,7 @@ def calc_win_probabiilty(competitor, user):
   return 0.5 * (math.erf((competitor[0] - user[0]) / math.sqrt(2 * \
       (competitor[1] * competitor[1] + user[1] * user[1]))) + 1)
 
+# TODO this comment is bullshit, but i don't know what the truth is yet
 # coders: list of 2-tuples (rating, volatility)
 def calc_perf_as(user, rank, coders):
   n = len(coders)
@@ -51,10 +52,8 @@ def calc_new_rating_vol(user, rank, played, coders):
       (weight + 1))
   return (new_rating, new_vol)
 
-def iterated_perf_as(user, rank, played, coders, iterations=30, rating=1200):
-  # TODO check this stuff with jmzero (vol value? is rating change supposed
-  #   to be capped? am i supposed to assume played=0 also?)
-  fixed_vol = 337
+def iterated_perf_as(rank, coders, iterations=30):
+  dummy = [1200, 337]
   for i in range(iterations):
-    rating, _ = calc_new_rating_vol((rating, fixed_vol), rank, played, coders)
-  return rating
+    dummy[0] = calc_perf_as(dummy, rank, coders)
+  return dummy[0]

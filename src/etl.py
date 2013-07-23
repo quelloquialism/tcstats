@@ -112,6 +112,8 @@ def fetch_feeds(to_fetch):
     log.debug("Fetching %s to local file %s" % (url, filename))
     fetched.append(filename)
     try:
+      # TODO this is very slow on connection failure, is there a way to 
+      #   config a timeout?
       (_, headers) = urllib.urlretrieve(url, filename)
     except:
       log.error("Caught error while fetching %s" % url)
