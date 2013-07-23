@@ -20,6 +20,7 @@ log_fhandler = TimedRotatingFileHandler(config["LOG_DIR"] + "/etl", \
 log_fhandler.setLevel(logging.DEBUG)
 log = logging.getLogger("etl")
 log.addHandler(log_fhandler)
+log.setLevel(logging.DEBUG)
 
 round_list_keys = [r[0] for r in config["ROUND_LIST_HEAD"]]
 round_list_table = "CREATE TABLE IF NOT EXISTS rounds (" + \
@@ -79,6 +80,7 @@ def fetch_round_results(round_ids):
 def load_files(to_load, expected_keys):
   for (filename, sql) in to_load:
     log.debug("Loading %s into db" % filename)
+    # TODO parse is slower than shit
     feed_dom = parse(filename)
     data = []
     for row in feed_dom.getElementsByTagName("row"):
@@ -93,7 +95,7 @@ def load_files(to_load, expected_keys):
   conn.commit()
 
 def load_round_list():
-  log.info("creating round list table 'rounds'")
+  log.info("Creating round list table 'rounds'")
   cursor.execute(round_list_table)
   field_ct = len(config["ROUND_LIST_HEAD"])
   insert_sql = "REPLACE INTO rounds VALUES (" + \
@@ -101,7 +103,7 @@ def load_round_list():
   load_files([(config["ROUND_LIST_FILE"], insert_sql)], round_list_keys)
 
 def load_coder_list():
-  log.info("creating round list table 'coders'")
+  log.info("Creating round list table 'coders'")
   cursor.execute(coder_list_table)
   field_ct = len(config["CODER_LIST_HEAD"])
   insert_sql = "REPLACE INTO coders VALUES (" + \
@@ -110,7 +112,7 @@ def load_coder_list():
 
 def load_round_results(round_ids):
   for rid in round_ids:
-    log.info("creating round results table 'results_%s'" % rid)
+    log.info("Creating round results table 'results_%s'" % rid)
     cursor.execute(round_results_table % rid)
   field_ct = len(config["ROUND_RESULTS_HEAD"])
   insert_sql = "REPLACE INTO results_%s VALUES (" + \
