@@ -88,7 +88,7 @@ round_results_desc = sorted([
   ("level_three_language", "text")
 ])
 round_results_keys = [r[0] for r in round_results_desc]
-round_results_table = "CREATE TABLE IF NOT EXISTS results_{0} (" + \
+round_results_table = "CREATE TABLE IF NOT EXISTS results_%s (" + \
     ",".join([" ".join(field) for field in round_results_desc]) + ")"
 
 conn = sqlite3.connect(config["SQL_DB"])
@@ -125,8 +125,8 @@ def fetch_round_list():
     load_round_list()
 
 def fetch_round_results(round_ids):
-  fetched = fetch_feeds([(config["ROUND_RESULTS_URL"].format(rid), \
-      config["ROUND_RESULTS_FILE"].format(rid)) for rid in round_ids])
+  fetched = fetch_feeds([(config["ROUND_RESULTS_URL"] % rid, \
+      config["ROUND_RESULTS_FILE"] % rid) for rid in round_ids])
   load_round_results(fetched)
 
 def load_files(to_load, expected_keys):
@@ -154,13 +154,12 @@ def load_round_list():
 
 def load_round_results(round_ids):
   for rid in round_ids:
-    # TODO sigh. which style is preferred, "{0}".format(blah) or "%s" % blah?
-    cursor.execute(round_results_table.format(rid))
+    cursor.execute(round_results_table % rid)
   field_ct = len(round_results_desc)
-  insert_sql = "REPLACE INTO results_{0} VALUES (" + \
+  insert_sql = "REPLACE INTO results_%s VALUES (" + \
       ",".join("?" * field_ct) + ")"
-  load_files([(config["ROUND_RESULTS_FILE"].format(rid), \
-      insert_sql.format(rid)) for rid in round_ids], round_results_keys)
+  load_files([(config["ROUND_RESULTS_FILE"] % rid, \
+      insert_sql % rid) for rid in round_ids], round_results_keys)
 
 def full_run():
   fetch_round_list()
