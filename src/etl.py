@@ -21,75 +21,13 @@ log_fhandler.setLevel(logging.DEBUG)
 log = logging.getLogger("etl")
 log.addHandler(log_fhandler)
 
-round_list_desc = sorted([
-  ("round_id", "integer", "primary key"),
-  ("full_name", "text"),
-  ("short_name", "text"),
-  ("round_type_desc", "text"),
-  ("date", "text")
-])
-round_list_keys = [r[0] for r in round_list_desc]
+round_list_keys = [r[0] for r in config["ROUND_LIST_HEAD"]]
 round_list_table = "CREATE TABLE IF NOT EXISTS rounds (" + \
-    ",".join([" ".join(field) for field in round_list_desc]) + ")"
+    ",".join([" ".join(field) for field in config["ROUND_LIST_HEAD"]]) + ")"
 
-round_results_desc = sorted([
-  ("room_id", "integer"),
-  ("room_name", "text"),
-  ("coder_id", "integer", "primary key"),
-  ("handle", "text"),
-  ("paid", "text"),
-  ("old_rating", "integer"),
-  ("new_rating", "integer"),
-  ("new_vol", "integer"),
-  ("num_ratings", "integer"),
-  ("room_placed", "integer"),
-  ("division_placed", "integer"),
-  ("advanced", "text"),
-  ("challenge_points", "real"),
-  ("system_test_points", "real"),
-  ("defense_points", "real"),
-  ("submission_points", "real"),
-  ("final_points", "real"),
-  ("division", "integer"),
-  ("problems_presented", "integer"),
-  ("problems_submitted", "integer"),
-  ("problems_correct", "integer"),
-  ("problems_failed_by_system_test", "integer"),
-  ("problems_failed_by_challenge", "integer"),
-  ("problems_opened", "integer"),
-  ("problems_left_open", "integer"),
-  ("challenge_attempts_made", "integer"),
-  ("challenges_made_successful", "integer"),
-  ("challenges_made_failed", "integer"),
-  ("challenge_attempts_received", "integer"),
-  ("challenges_received_successful", "integer"),
-  ("challenges_received_failed", "integer"),
-  ("rated_flag", "integer"),
-  ("level_one_problem_id", "integer"),
-  ("level_one_submission_points", "real"),
-  ("level_one_final_points", "real"),
-  ("level_one_status", "text"),
-  ("level_one_time_elapsed", "integer"),
-  ("level_one_placed", "integer"),
-  ("level_one_language", "text"),
-  ("level_two_problem_id", "integer"),
-  ("level_two_submission_points", "real"),
-  ("level_two_final_points", "real"),
-  ("level_two_status", "text"),
-  ("level_two_time_elapsed", "integer"),
-  ("level_two_placed", "integer"),
-  ("level_two_language", "text"),
-  ("level_three_problem_id", "integer"),
-  ("level_three_submission_points", "real"),
-  ("level_three_final_points", "real"),
-  ("level_three_status", "text"),
-  ("level_three_time_elapsed", "integer"),
-  ("level_three_placed", "integer"),
-  ("level_three_language", "text")
-])
-round_results_keys = [r[0] for r in round_results_desc]
+round_results_keys = [r[0] for r in config["ROUND_RESULTS_HEAD"]]
 round_results_table = "CREATE TABLE IF NOT EXISTS results_%s (" + \
-    ",".join([" ".join(field) for field in round_results_desc]) + ")"
+    ",".join([" ".join(field) for field in config["ROUND_RESULTS_HEAD"]]) + ")"
 
 conn = sqlite3.connect(config["SQL_DB"])
 cursor = conn.cursor()
@@ -147,7 +85,7 @@ def load_files(to_load, expected_keys):
 
 def load_round_list():
   cursor.execute(round_list_table)
-  field_ct = len(round_list_desc)
+  field_ct = len(config["ROUND_LIST_HEAD"])
   insert_sql = "REPLACE INTO rounds VALUES (" + \
       ",".join("?" * field_ct) + ")"
   load_files([(config["ROUND_LIST_FILE"], insert_sql)], round_list_keys)
@@ -155,7 +93,7 @@ def load_round_list():
 def load_round_results(round_ids):
   for rid in round_ids:
     cursor.execute(round_results_table % rid)
-  field_ct = len(round_results_desc)
+  field_ct = len(config["ROUND_RESULTS_HEAD"])
   insert_sql = "REPLACE INTO results_%s VALUES (" + \
       ",".join("?" * field_ct) + ")"
   load_files([(config["ROUND_RESULTS_FILE"] % rid, \
