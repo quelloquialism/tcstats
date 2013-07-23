@@ -29,6 +29,10 @@ round_results_keys = [r[0] for r in config["ROUND_RESULTS_HEAD"]]
 round_results_table = "CREATE TABLE IF NOT EXISTS results_%s (" + \
     ",".join([" ".join(field) for field in config["ROUND_RESULTS_HEAD"]]) + ")"
 
+coder_list_keys = [r[0] for r in config["CODER_LIST_HEAD"]]
+coder_list_table = "CREATE TABLE IF NOT EXISTS coders (" + \
+    ",".join([" ".join(field) for field in config["CODER_LIST_HEAD"]]) + ")"
+
 conn = sqlite3.connect(config["SQL_DB"])
 cursor = conn.cursor()
 
@@ -62,6 +66,11 @@ def fetch_round_list():
   if len(fetched) > 0:
     load_round_list()
 
+def fetch_coder_list():
+  fetched = fetch_feeds([(config["CODER_LIST_URL"], config["CODER_LIST_FILE"])])
+  if len(fetched) > 0:
+    load_coder_list()
+
 def fetch_round_results(round_ids):
   fetched = fetch_feeds([(config["ROUND_RESULTS_URL"] % rid, \
       config["ROUND_RESULTS_FILE"] % rid) for rid in round_ids])
@@ -84,14 +93,24 @@ def load_files(to_load, expected_keys):
   conn.commit()
 
 def load_round_list():
+  log.info("creating round list table 'rounds'")
   cursor.execute(round_list_table)
   field_ct = len(config["ROUND_LIST_HEAD"])
   insert_sql = "REPLACE INTO rounds VALUES (" + \
       ",".join("?" * field_ct) + ")"
   load_files([(config["ROUND_LIST_FILE"], insert_sql)], round_list_keys)
 
+def load_coder_list():
+  log.info("creating round list table 'coders'")
+  cursor.execute(coder_list_table)
+  field_ct = len(config["CODER_LIST_HEAD"])
+  insert_sql = "REPLACE INTO coders VALUES (" + \
+      ",".join("?" * field_ct) + ")"
+  load_files([(config["CODER_LIST_FILE"], insert_sql)], coder_list_keys)
+
 def load_round_results(round_ids):
   for rid in round_ids:
+    log.info("creating round results table 'results_%s'" % rid)
     cursor.execute(round_results_table % rid)
   field_ct = len(config["ROUND_RESULTS_HEAD"])
   insert_sql = "REPLACE INTO results_%s VALUES (" + \
@@ -101,5 +120,6 @@ def load_round_results(round_ids):
 
 def full_run():
   fetch_round_list()
+  fetch_coder_list()
   round_ids = [row[0] for row in cursor.execute("SELECT round_id FROM rounds")]
   fetch_round_results(round_ids)

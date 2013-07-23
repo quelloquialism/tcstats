@@ -6,6 +6,8 @@ SQL_DB = "tc_data.db"
 STATS_URL = "http://community.topcoder.com/tc?module=BasicData"
 ROUND_LIST_URL = STATS_URL + "&c=dd_round_list"
 ROUND_LIST_FILE = "/tmp/round_list.xml"
+CODER_LIST_URL = STATS_URL + "&c=dd_coder_list"
+CODER_LIST_FILE = "/tmp/coder_list.xml"
 ROUND_RESULTS_URL = STATS_URL + "&c=dd_round_results&rd=%s"
 ROUND_RESULTS_FILE = "/tmp/round_results_%s.xml"
 
@@ -15,6 +17,25 @@ ROUND_LIST_HEAD = sorted([
   ("short_name", "text"),
   ("round_type_desc", "text"),
   ("date", "text")
+])
+
+CODER_LIST_HEAD = sorted([
+  ("coder_id", "integer", "primary key"),
+  ("handle", "text"),
+  ("country_name", "text"),
+  ("alg_rating", "integer"),
+  ("alg_vol", "integer"),
+  ("alg_num_ratings", "integer"),
+  ("des_rating", "integer"),
+  ("des_vol", "integer"),
+  ("des_num_ratings", "integer"),
+  ("dev_rating", "integer"),
+  ("dev_vol", "integer"),
+  ("dev_num_ratings", "integer"),
+  ("mar_rating", "integer"),
+  ("mar_vol", "integer"),
+  ("mar_num_ratings", "integer"),
+  ("school", "text")
 ])
 
 ROUND_RESULTS_HEAD = sorted([
