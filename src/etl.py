@@ -17,10 +17,10 @@ from xml.dom.minidom import parse
 # TODO who does log dir creation? also make sure permissions allow this
 log_fhandler = TimedRotatingFileHandler(config["LOG_DIR"] + "/etl", \
     backupCount=config["LOG_BACKUPS"], when="midnight", interval=1, utc=True)
-log_fhandler.setLevel(logging.DEBUG)
+log_fhandler.setLevel(logging.DEBUG if config["DEBUG"] else logging.INFO)
 log = logging.getLogger("etl")
 log.addHandler(log_fhandler)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.DEBUG if config["DEBUG"] else logging.INFO)
 
 round_list_keys = [r[0] for r in config["ROUND_LIST_HEAD"]]
 round_list_table = "CREATE TABLE IF NOT EXISTS rounds (" + \
