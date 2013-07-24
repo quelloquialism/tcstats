@@ -96,4 +96,31 @@ def get_ranking(coder, country=None, lang=None):
 def get_round_accomplishments(coder, limit):
   return [] # TODO
 
-# TODO PvPetr
+def pvpetr(user_cid, opp_cid=10574855):
+  cids = [user_cid, opp_cid]
+  find_matches = "SELECT round_id FROM coder_rounds WHERE coder_id=%s"
+  find_match_scores = "SELECT level_one_final_points, " + \
+      "level_two_final_points, level_three_final_points " + \
+      "FROM round_results_%s WHERE coder_id=%s"
+  find_match_name = "SELECT short_name FROM rounds WHERE round_id=%s"
+  matches = defaultdict(int)
+  for cid in cids:
+    for row in cursor.execute(find_matches % cid):
+      matches[row[0]] += 1
+  user_win = []
+  opp_win = []
+  for round_id in matches:
+    if matches[round_id] == 2:
+      match_name = cursor.execute(find_match_name % round_id).fetchone()[0]
+      results = {}
+      for cid in cids:
+        results[cid] = \
+            cursor.execute(find_match_scores % (round_id, cid)).fetchone()
+      for problem in range(3):
+        user_score = results[cid[0]][problem]
+        opp_score = results[cid[1]][problem]
+        if user_score > opp_score:
+          user_win.append((match_name, problem, user_score, opp_score))
+        elif user_score < opp_score:
+          opp_win.append((match_name, problem, user_score, opp_score))
+  return (user_win, opp_win)

@@ -22,17 +22,20 @@ log = logging.getLogger("etl")
 log.addHandler(log_fhandler)
 log.setLevel(logging.DEBUG if config["DEBUG"] else logging.INFO)
 
-round_list_keys = [r[0] for r in config["ROUND_LIST_HEAD"]]
-round_list_table = "CREATE TABLE IF NOT EXISTS rounds (" + \
-    ",".join([" ".join(field) for field in config["ROUND_LIST_HEAD"]]) + ")"
+def keys_table(head, table_name):
+  keys = [r[0] for r in head]
+  table = "CREATE TABLE IF NOT EXISTS " + table_name + " (" + \
+      ",".join([" ".join(field) for field in head]) + ")"
+  return keys, table
 
-round_results_keys = [r[0] for r in config["ROUND_RESULTS_HEAD"]]
-round_results_table = "CREATE TABLE IF NOT EXISTS results_%s (" + \
-    ",".join([" ".join(field) for field in config["ROUND_RESULTS_HEAD"]]) + ")"
-
-coder_list_keys = [r[0] for r in config["CODER_LIST_HEAD"]]
-coder_list_table = "CREATE TABLE IF NOT EXISTS coders (" + \
-    ",".join([" ".join(field) for field in config["CODER_LIST_HEAD"]]) + ")"
+round_list_keys, round_list_table = keys_table(
+    config["ROUND_LIST_HEAD"], "rounds")
+round_results_keys, round_results_table = keys_table(
+    config["ROUND_RESULTS_HEAD"], "results_%s")
+coder_list_keys, coder_list_table = keys_table(
+    config["CODER_LIST_HEAD"], "coders")
+coder_rounds_keys, coder_rounds_table = keys_table(
+    config["CODER_ROUNDS_HEAD"], "coder_rounds")
 
 conn = sqlite3.connect(config["SQL_DB"])
 cursor = conn.cursor()
@@ -120,6 +123,17 @@ def load_round_results(round_ids):
       ",".join("?" * field_ct) + ")"
   load_files([(config["ROUND_RESULTS_FILE"] % rid, \
       insert_sql % rid) for rid in round_ids], round_results_keys)
+  update_coder_rounds_mapping(round_ids):
+
+def update_coder_rounds_mapping(round_ids):
+  cursor.execute(coder_rounds_table)
+  for rid in round_ids:
+    get_cids = "SELECT coder_id FROM results_%s" % rid
+    insert_sql = "REPLACE INTO coder_rounds VALUES (%s, " + str(rid) + ")"
+    commands = []
+    for row in cursor.execute(get_cids):
+      commands.append(insert_sql % row[0])
+    cursor.executemany(commands)
 
 def full_run():
   fetch_round_list()

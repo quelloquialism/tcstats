@@ -93,3 +93,9 @@ ROUND_RESULTS_HEAD = sorted([
   ("level_three_placed", "integer"),
   ("level_three_language", "text")
 ])
+
+CODER_ROUNDS_HEAD = sorted([
+  ("coder_id", "integer"),
+  ("round_id", "integer"),
+  ("UNIQUE", "(coder_id, round_id)")
+])
