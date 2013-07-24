@@ -6,7 +6,7 @@ from logging.handlers import TimedRotatingFileHandler
 import sqlite3
 import time
 import urllib
-from xml.dom.minidom import parse
+import xml.etree.cElementTree as ET
 
 # Program execution flow:
 #  1a) fetch_round_list(): download the round_list xml, call load
@@ -42,13 +42,8 @@ cursor = conn.cursor()
 
 def read_row(row):
   row_data = {}
-  child = row.firstChild
-  while child is not None:
-    if child.firstChild is not None:
-      row_data[child.nodeName] = child.firstChild.nodeValue
-    else:
-      row_data[child.nodeName] = None
-    child = child.nextSibling
+  for child in row:
+    row_data[child.tag] = child.text
   return row_data
 
 def fetch_feeds(to_fetch):
@@ -83,18 +78,21 @@ def fetch_round_results(round_ids):
 def load_files(to_load, expected_keys):
   for (filename, sql) in to_load:
     log.debug("Loading %s into db" % filename)
-    # TODO parse is slower than shit
-    # (maybe try lxml when i get a chance to download it?)
-    feed_dom = parse(filename)
+    print "parsing..."
+    feed_et = ET.parse(filename)
+    print "parse complete, rowreads..."
+    feed_root = feed_et.getroot()
     data = []
-    for row in feed_dom.getElementsByTagName("row"):
+    for row in feed_root:
       data.append(read_row(row))
+    print "rowreads complete"
     for i in xrange(len(data)):
       keys = sorted(data[i].keys())
       if keys == expected_keys:
         data[i] = [data[i][x] for x in keys]
       else:
         log.error("%s does not match expected schema, skipping" % filename)
+    print "data formatted, executemany"
     cursor.executemany(sql, data)
   conn.commit()
 
@@ -123,7 +121,7 @@ def load_round_results(round_ids):
       ",".join("?" * field_ct) + ")"
   load_files([(config["ROUND_RESULTS_FILE"] % rid, \
       insert_sql % rid) for rid in round_ids], round_results_keys)
-  update_coder_rounds_mapping(round_ids):
+  update_coder_rounds_mapping(round_ids)
 
 def update_coder_rounds_mapping(round_ids):
   cursor.execute(coder_rounds_table)
