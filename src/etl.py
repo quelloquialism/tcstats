@@ -78,21 +78,17 @@ def fetch_round_results(round_ids):
 def load_files(to_load, expected_keys):
   for (filename, sql) in to_load:
     log.debug("Loading %s into db" % filename)
-    print "parsing..."
     feed_et = ET.parse(filename)
-    print "parse complete, rowreads..."
     feed_root = feed_et.getroot()
     data = []
     for row in feed_root:
       data.append(read_row(row))
-    print "rowreads complete"
     for i in xrange(len(data)):
       keys = sorted(data[i].keys())
       if keys == expected_keys:
         data[i] = [data[i][x] for x in keys]
       else:
         log.error("%s does not match expected schema, skipping" % filename)
-    print "data formatted, executemany"
     cursor.executemany(sql, data)
   conn.commit()
 
