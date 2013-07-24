@@ -27,10 +27,11 @@ def show_selector():
 
 @app.route("/tcstats", methods=["GET"])
 def query_handle():
-  # TODO why can't i seem to access form data? this line crashes the app
-  #handle = request.form["handle"]
-  #print handle
-  handle = "Aleksey"
+  # TODO why can't i seem to access form data? this line falls thru to except
+  try:
+    handle = request.form["handle"]
+  except:
+    handle = "Aleksey"
   cursor = g.conn.execute("SELECT coder_id, old_rating, new_rating " + \
       "FROM results_50 WHERE handle=\"%s\"" % handle)
   cid, old_rating, new_rating = cursor.fetchone()
