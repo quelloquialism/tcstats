@@ -81,6 +81,7 @@ def load_files(to_load, expected_keys):
   for (filename, sql) in to_load:
     log.debug("Loading %s into db" % filename)
     # TODO parse is slower than shit
+    # (maybe try lxml when i get a chance to download it?)
     feed_dom = parse(filename)
     data = []
     for row in feed_dom.getElementsByTagName("row"):

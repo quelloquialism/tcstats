@@ -25,40 +25,39 @@ def ordinal(i):
 
 def get_compliment(rating):
   compliments = [
-    (40, "an unreal super-hyper-target"),
-    (37, "an indisputably world-class"),
-    (36, "an off-the-charts awesome"),
-    (35, "a splendiferatageneous"),
-    (34, "an absolutely elite"),
-    (33, "a world beating"),
-    (32, "a truly amazing"),
-    (31, "a really quite very smart"),
-    (30, "an unoverestimatable"),
-    (29, "a soon-to-be-targeted"),
-    (28, "an upper crust"),
-    (27, "a smashing"),
-    (26, "an impressive"),
-    (25, "a savvy"),
-    (24, "a weighty-brained"),
-    (23, "an algorithmically inclined"),
-    (22, "a top"),
-    (21, "a soon-to-be-red"),
-    (20, "a problem gobbling"),
-    (19, "a solid"),
-    (18, "a good smart"),
-    (17, "a tough"),
-    (16, "a two-ply extra strong"),
-    (15, "a strong"),
-    (14, "a soon-to-be-yellow"),
-    (13, "a smart"),
-    (12, "a well liked"),
-    (11, "a soon-to-be-blue"),
-    ( 5, "an up-and-coming"),
-    ( 0, "a scruffy fighter of a")
+    (4000, "an unreal super-hyper-target"),
+    (3700, "an indisputably world-class"),
+    (3600, "an off-the-charts awesome"),
+    (3500, "a splendiferatageneous"),
+    (3400, "an absolutely elite"),
+    (3300, "a world beating"),
+    (3200, "a truly amazing"),
+    (3100, "a really quite very smart"),
+    (3000, "an unoverestimatable"),
+    (2900, "a soon-to-be-targeted"),
+    (2800, "an upper crust"),
+    (2700, "a smashing"),
+    (2600, "an impressive"),
+    (2500, "a savvy"),
+    (2400, "a weighty-brained"),
+    (2300, "an algorithmically inclined"),
+    (2200, "a top"),
+    (2100, "a soon-to-be-red"),
+    (2000, "a problem gobbling"),
+    (1900, "a solid"),
+    (1800, "a good smart"),
+    (1700, "a tough"),
+    (1600, "a two-ply extra strong"),
+    (1500, "a strong"),
+    (1400, "a soon-to-be-yellow"),
+    (1300, "a smart"),
+    (1200, "a well liked"),
+    (1100, "a soon-to-be-blue"),
+    ( 500, "an up-and-coming"),
+    (   0, "a scruffy fighter of a")
   ]
-  rating_ind = rating / 100
   for c in compliments:
-    if rating_ind >= c[0]:
+    if rating >= c[0]:
       return c[1]
   return "an indescribable"
 
