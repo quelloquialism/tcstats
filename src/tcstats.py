@@ -32,12 +32,12 @@ def query_handle():
     handle = request.form["handle"]
   except:
     handle = "Aleksey"
-  cursor = g.conn.execute("SELECT coder_id, old_rating, new_rating " + \
-      "FROM results_50 WHERE handle=\"%s\"" % handle)
-  cid, old_rating, new_rating = cursor.fetchone()
-  dummy = ["just", "some", "words"]
+  cid = g.conn.execute("SELECT coder_id FROM coders WHERE handle = ?", \
+      [handle]).fetchone()[0]
+  rounds = [row[0] for row in g.conn.execute(
+      "SELECT round_id FROM coder_rounds WHERE coder_id = ?", [cid]).fetchall()]
   return render_template("tcstats.html", cid=cid, handle=handle,
-      old_rating=old_rating, new_rating=new_rating, dummy=dummy)
+      rounds=sorted(rounds), len_rounds=len(rounds))
 
 if __name__ == "__main__":
   app.run()
