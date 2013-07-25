@@ -17,10 +17,12 @@ import xml.etree.cElementTree as ET
 # TODO who does log dir creation? also make sure permissions allow this
 log_fhandler = TimedRotatingFileHandler(config["LOG_DIR"] + "/etl", \
     backupCount=config["LOG_BACKUPS"], when="midnight", interval=1, utc=True)
-log_fhandler.setLevel(logging.DEBUG if config["DEBUG"] else logging.INFO)
+log_fmt = logging.Formatter(config["LOG_FORMAT"])
 log = logging.getLogger("etl")
 log.addHandler(log_fhandler)
 log.setLevel(logging.DEBUG if config["DEBUG"] else logging.INFO)
+log_fhandler.setFormatter(log_fmt)
+log_fhandler.setLevel(logging.DEBUG if config["DEBUG"] else logging.INFO)
 
 def keys_table(head, table_name):
   keys = [r[0] for r in head]

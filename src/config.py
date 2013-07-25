@@ -2,6 +2,8 @@
 DEBUG = True
 LOG_DIR = "/var/log/tcstats"
 LOG_BACKUPS = 365
+LOG_FORMAT = \
+    "%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d :: %(message)s"
 SQL_DB = "tc_data.db"
 STATS_URL = "http://community.topcoder.com/tc?module=BasicData"
 ROUND_LIST_URL = STATS_URL + "&c=dd_round_list"
@@ -97,5 +99,5 @@ ROUND_RESULTS_HEAD = sorted([
 CODER_ROUNDS_HEAD = sorted([
   ("coder_id", "integer"),
   ("round_id", "integer"),
-  ("UNIQUE", "(coder_id, round_id)")
+  ("unique", "(coder_id, round_id)")
 ])
