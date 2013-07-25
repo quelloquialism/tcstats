@@ -125,11 +125,11 @@ def update_coder_rounds_mapping(round_ids):
   cursor.execute(coder_rounds_table)
   for rid in round_ids:
     get_cids = "SELECT coder_id FROM results_%s" % rid
-    insert_sql = "REPLACE INTO coder_rounds VALUES (%s, " + str(rid) + ")"
+    insert_sql = "REPLACE INTO coder_rounds VALUES (?, ?)"
     commands = []
     for row in cursor.execute(get_cids):
-      commands.append(insert_sql % row[0])
-    cursor.executemany(commands)
+      commands.append((row[0], rid))
+    cursor.executemany(insert_sql, commands)
 
 def full_run():
   fetch_round_list()
