@@ -139,6 +139,7 @@ def update_coder_rounds_mapping(round_ids):
     for row in cursor.execute(get_cids):
       commands.append((row[0], rid))
     cursor.executemany(insert_sql, commands)
+  conn.commit()
   log.info("Mappings complete")
 
 def full_run():
