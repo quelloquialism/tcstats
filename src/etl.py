@@ -56,8 +56,8 @@ def fetch_feeds(to_fetch):
       # TODO this is very slow on connection failure, is there a way to 
       #   config a timeout?
       (_, headers) = urllib.urlretrieve(url, filename)
-    except:
-      log.error("Caught error while fetching %s" % url)
+    except IOError, e: # TODO is IOError the only one urllib throws?
+      log.error("Caught error while fetching %s: %s" % (url, e))
   return fetched
 
 def fetch_round_list():
