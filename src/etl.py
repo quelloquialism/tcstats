@@ -52,7 +52,7 @@ def fetch_feeds(to_fetch):
   fetched = []
   for (url, filename) in to_fetch:
     time.sleep(1) # throttle fetches to prevent flooding TC server
-    log.debug("Fetching %s to local file %s" % (url, filename))
+    log.info("Fetching %s to local file %s" % (url, filename))
     fetched.append(filename)
     try:
       # TODO this is very slow on connection failure, is there a way to 
@@ -79,18 +79,22 @@ def fetch_round_results(round_ids):
 
 def load_files(to_load, expected_keys):
   for (filename, sql) in to_load:
-    log.debug("Loading %s into db" % filename)
-    feed_et = ET.parse(filename)
-    feed_root = feed_et.getroot()
+    log.info("Loading %s into db" % filename)
     data = []
-    for row in feed_root:
-      data.append(read_row(row))
+    try:
+      feed_et = ET.parse(filename)
+      feed_root = feed_et.getroot()
+      for row in feed_root:
+        data.append(read_row(row))
+    except: # TODO what kind of errors can this throw? IO? Parse?
+      log.error("Failed to parse %s" % filename)
     for i in xrange(len(data)):
       keys = sorted(data[i].keys())
       if keys == expected_keys:
         data[i] = [data[i][x] for x in keys]
       else:
-        log.error("%s does not match expected schema, skipping" % filename)
+        log.error("%s row %s does not match expected schema, skipping" % \
+            (filename, i))
     cursor.executemany(sql, data)
   conn.commit()
 
@@ -101,14 +105,16 @@ def load_round_list():
   insert_sql = "REPLACE INTO rounds VALUES (" + \
       ",".join("?" * field_ct) + ")"
   load_files([(config["ROUND_LIST_FILE"], insert_sql)], round_list_keys)
+  log.info("Finished loading round list")
 
 def load_coder_list():
-  log.info("Creating round list table 'coders'")
+  log.info("Creating coder list table 'coders'")
   cursor.execute(coder_list_table)
   field_ct = len(config["CODER_LIST_HEAD"])
   insert_sql = "REPLACE INTO coders VALUES (" + \
       ",".join("?" * field_ct) + ")"
   load_files([(config["CODER_LIST_FILE"], insert_sql)], coder_list_keys)
+  log.info("Finishing loading coder list")
 
 def load_round_results(round_ids):
   for rid in round_ids:
@@ -119,10 +125,13 @@ def load_round_results(round_ids):
       ",".join("?" * field_ct) + ")"
   load_files([(config["ROUND_RESULTS_FILE"] % rid, \
       insert_sql % rid) for rid in round_ids], round_results_keys)
+  log.info("Finished loading %s round results" % len(round_ids))
   update_coder_rounds_mapping(round_ids)
 
 def update_coder_rounds_mapping(round_ids):
+  log.info("Creating coder-rounds mapping table 'coder_rounds'")
   cursor.execute(coder_rounds_table)
+  log.info("Writing mappings for %s rounds" % len(round_ids))
   for rid in round_ids:
     get_cids = "SELECT coder_id FROM results_%s" % rid
     insert_sql = "REPLACE INTO coder_rounds VALUES (?, ?)"
@@ -130,6 +139,7 @@ def update_coder_rounds_mapping(round_ids):
     for row in cursor.execute(get_cids):
       commands.append((row[0], rid))
     cursor.executemany(insert_sql, commands)
+  log.info("Mappings complete")
 
 def full_run():
   fetch_round_list()
