@@ -1,5 +1,4 @@
 from tcstats import app
-config = app.config
 
 import logging
 from logging.handlers import TimedRotatingFileHandler
@@ -7,6 +6,8 @@ import sqlite3
 import time
 import urllib
 import xml.etree.cElementTree as ET
+
+config = app.config
 
 # Program execution flow:
 #  1a) fetch_round_list(): download the round_list xml, call load
