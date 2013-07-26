@@ -1,4 +1,7 @@
 #!/usr/bin/python
+
+import rating_functions
+
 from flask import Flask, g, render_template, request, url_for
 # TODO only import what is used in the end
 from flask import session, redirect, abort, flash
@@ -31,13 +34,17 @@ def query_handle():
   try:
     handle = request.form["handle"]
   except:
-    handle = "Aleksey"
+    handle = "Quelloquialism"
   cid = g.conn.execute("SELECT coder_id FROM coders WHERE handle = ?", \
       [handle]).fetchone()[0]
   rounds = [row[0] for row in g.conn.execute(
       "SELECT round_id FROM coder_rounds WHERE coder_id = ?", [cid]).fetchall()]
+  pvpetr = rating_functions.pvpetr(g.conn, cid)
+  pvpetr = [["%s Level %d: %.2f to %.2f" % data for data in winloss] \
+      for winloss in pvpetr]
   return render_template("tcstats.html", cid=cid, handle=handle,
-      rounds=sorted(rounds), len_rounds=len(rounds))
+      rounds=sorted(rounds), len_rounds=len(rounds),
+      pvpetr=pvpetr)
 
 if __name__ == "__main__":
   app.run()

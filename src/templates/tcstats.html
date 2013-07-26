@@ -12,5 +12,13 @@
     <li>None.</li>
   {% endfor %}
   </ul>
+  <h2>PvPetr</h2>
+  {% for wl in pvpetr %}
+  <ul>
+  {% for problem in wl %}
+    <li>{{ problem }}</li>
+  {% endfor %}
+  </ul>
+  {% endfor %}
 </div>
 {% endblock %}

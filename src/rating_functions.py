@@ -3,12 +3,8 @@
 from tcstats import app
 
 from collections import defaultdict
-import sqlite3
 
 config = app.config
-
-conn = sqlite3.connect(config["SQL_DB"])
-cursor = conn.cursor()
 
 def as_of():
   last_round_sql = \
@@ -106,7 +102,8 @@ def get_ranking(coder, country=None, lang=None):
 def get_round_accomplishments(coder, limit):
   return [] # TODO
 
-def pvpetr(user_cid, opp_cid=10574855):
+def pvpetr(conn, user_cid, opp_cid=10574855):
+  cursor = conn.cursor()
   cids = [user_cid, opp_cid]
   find_matches = "SELECT round_id FROM coder_rounds WHERE coder_id=%s"
   find_match_scores = "SELECT level_one_final_points, " + \
@@ -132,7 +129,7 @@ def pvpetr(user_cid, opp_cid=10574855):
         user_score = results[cids[0]][problem]
         opp_score = results[cids[1]][problem]
         if user_score > opp_score:
-          user_win.append((match_name, problem, user_score, opp_score))
+          user_win.append((match_name, problem + 1, user_score, opp_score))
         elif user_score < opp_score:
-          opp_win.append((match_name, problem, user_score, opp_score))
+          opp_win.append((match_name, problem + 1, user_score, opp_score))
   return (user_win, opp_win)
