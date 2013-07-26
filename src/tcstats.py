@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-import rating_functions
-
 from flask import Flask, g, render_template, request, url_for
 # TODO only import what is used in the end
 from flask import session, redirect, abort, flash
@@ -10,6 +8,8 @@ import sqlite3
 app = Flask(__name__)
 app.config.from_object("config")
 app.config.from_envvar("TCSTATS_SETTINGS", silent=True)
+
+import rating_functions
 
 def get_db_conn():
   return sqlite3.connect(app.config["SQL_DB"])
