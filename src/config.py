@@ -99,5 +99,11 @@ ROUND_RESULTS_HEAD = sorted([
 CODER_ROUNDS_HEAD = sorted([
   ("coder_id", "integer"),
   ("round_id", "integer"),
+  ("division", "integer"),
+  ("old_rating", "integer"),
+  ("new_rating", "integer"),
+  ("new_vol", "integer"),
+  ("division_placed", "integer"),
+  ("room_placed", "integer"),
   ("unique", "(coder_id, round_id)")
 ])

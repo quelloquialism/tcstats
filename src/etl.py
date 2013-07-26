@@ -56,11 +56,13 @@ def fetch_feeds(to_fetch):
     log.info("Fetching %s to local file %s" % (url, filename))
     fetched.append(filename)
     try:
+      # TODO remove all these TODOs
       # TODO this is very slow on connection failure, is there a way to 
       #   config a timeout?
       # TODO observed an instance of this hanging without any errors or return
       #   for over 6 hours, this app can't work until i get rid of this
       # TODO retry failed fetches?
+      # TODO maybe try the requests module i hate urllib
       (_, headers) = urllib.urlretrieve(url, filename)
     except IOError, e: # TODO is IOError the only one urllib throws?
       log.error("Caught error while fetching %s: %s" % (url, e))
@@ -136,12 +138,20 @@ def update_coder_rounds_mapping(round_ids):
   log.info("Creating coder-rounds mapping table 'coder_rounds'")
   cursor.execute(coder_rounds_table)
   log.info("Writing mappings for %s rounds" % len(round_ids))
+  fetch_keys = []
+  for key in coder_rounds_keys:
+    if "unique" not in key and key != "round_id":
+      fetch_keys.append(key)
   for rid in round_ids:
-    get_cids = "SELECT coder_id FROM results_%s" % rid
-    insert_sql = "REPLACE INTO coder_rounds VALUES (?, ?)"
+    select_sql = "SELECT %s FROM results_%s" % (", ".join(fetch_keys), rid)
+    insert_sql = "REPLACE INTO coder_rounds VALUES (" + \
+        ",".join("?" * (len(coder_rounds_keys) - 1)) + ")"
     commands = []
-    for row in cursor.execute(get_cids):
-      commands.append((row[0], rid))
+    for row in cursor.execute(select_sql):
+      datamap = {"round_id": rid}
+      for i in range(len(row)):
+        datamap[fetch_keys[i]] = row[i]
+      commands.append([datamap[k] for k in sorted(datamap)])
     cursor.executemany(insert_sql, commands)
   conn.commit()
   log.info("Mappings complete")
