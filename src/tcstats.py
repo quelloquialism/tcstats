@@ -30,9 +30,8 @@ def show_selector():
 
 @app.route("/tcstats", methods=["GET"])
 def query_handle():
-  # TODO why can't i seem to access form data? this line falls thru to except
   try:
-    handle = request.form["handle"]
+    handle = request.args["handle"]
   except:
     handle = "Quelloquialism"
   cid = g.conn.execute("SELECT coder_id FROM coders WHERE handle = ?", \
