@@ -39,11 +39,14 @@ def query_handle():
       [handle]).fetchone()[0]
   rounds = [row[0] for row in g.conn.execute(
       "SELECT round_id FROM coder_rounds WHERE coder_id = ?", [cid]).fetchall()]
+  round_names = [row[0] for row in g.conn.execute(
+      "SELECT short_name FROM rounds WHERE round_id IN (" + \
+      ", ".join("?" * len(rounds)) + ")", rounds).fetchall()]
   pvpetr = rating_functions.pvpetr(g.conn, cid)
-  pvpetr = [["%s Level %d: %.2f to %.2f" % data for data in winloss] \
+  pvpetr = [["%s Level %d: %s to %s" % data for data in winloss] \
       for winloss in pvpetr]
   return render_template("tcstats.html", cid=cid, handle=handle,
-      rounds=sorted(rounds), len_rounds=len(rounds),
+      rounds=round_names, len_rounds=len(rounds),
       pvpetr=pvpetr)
 
 if __name__ == "__main__":
