@@ -58,6 +58,9 @@ def fetch_feeds(to_fetch):
     try:
       # TODO this is very slow on connection failure, is there a way to 
       #   config a timeout?
+      # TODO observed an instance of this hanging without any errors or return
+      #   for over 6 hours, this app can't work until i get rid of this
+      # TODO retry failed fetches?
       (_, headers) = urllib.urlretrieve(url, filename)
     except IOError, e: # TODO is IOError the only one urllib throws?
       log.error("Caught error while fetching %s: %s" % (url, e))
