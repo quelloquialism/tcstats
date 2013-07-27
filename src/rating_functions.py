@@ -6,7 +6,8 @@ from collections import defaultdict
 
 config = app.config
 
-def as_of():
+def as_of(conn):
+  cursor = conn.cursor()
   last_round_sql = \
       "SELECT short_name, date FROM rounds ORDER BY date DESC LIMIT 1"
   name, date = cursor.execute(last_round_sql).fetchone()

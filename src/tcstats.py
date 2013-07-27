@@ -26,7 +26,7 @@ def teardown_request(exception):
 
 @app.route("/")
 def show_selector():
-  return render_template("landing.html")
+  return render_template("landing.html", asof=rating_functions.as_of(g.conn))
 
 @app.route("/tcstats", methods=["GET"])
 def query_handle():
@@ -35,7 +35,7 @@ def query_handle():
     cid = g.conn.execute("SELECT coder_id FROM coders WHERE handle = ?", \
         [handle]).fetchone()[0]
   except:
-    return render_template("landing.html")
+    return render_template("landing.html", asof=rating_functions.as_of(g.conn))
 
   rounds = g.conn.execute(
       "SELECT * FROM coder_rounds WHERE coder_id = ?", [cid]).fetchall()
@@ -50,7 +50,7 @@ def query_handle():
       for winloss in pvpetr]
   return render_template("tcstats.html", cid=cid, handle=handle,
       rounds=rounds, len_rounds=len(rounds),
-      pvpetr=pvpetr)
+      pvpetr=pvpetr, asof=rating_functions.as_of(g.conn))
 
 if __name__ == "__main__":
   app.run()
