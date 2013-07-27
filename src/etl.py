@@ -2,6 +2,7 @@ from tcstats import app
 
 import logging
 from logging.handlers import TimedRotatingFileHandler
+import requests
 import sqlite3
 import time
 import urllib
@@ -63,7 +64,12 @@ def fetch_feeds(to_fetch):
       #   for over 6 hours, this app can't work until i get rid of this
       # TODO retry failed fetches?
       # TODO maybe try the requests module i hate urllib
-      (_, headers) = urllib.urlretrieve(url, filename)
+      #(_, headers) = urllib.urlretrieve(url, filename)
+      req = requests.get(url, stream=True)
+      if req.status_code == 200:
+        with open(filename, 'wb') as feedfile:
+          for chunk in req.iter_content(1024):
+            feedfile.write(chunk)
     except IOError, e: # TODO is IOError the only one urllib throws?
       log.error("Caught error while fetching %s: %s" % (url, e))
   return fetched
