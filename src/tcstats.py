@@ -32,8 +32,8 @@ def show_selector():
 def query_handle():
   try:
     handle = request.args["handle"]
-    cid = g.conn.execute("SELECT coder_id FROM coders WHERE handle = ?", \
-        [handle]).fetchone()[0]
+    cid, rating = g.conn.execute("SELECT coder_id, alg_rating FROM coders " + \
+        "WHERE handle = ?", [handle]).fetchone()
   except:
     return render_template("landing.html", asof=rating_functions.as_of(g.conn))
 
@@ -48,9 +48,10 @@ def query_handle():
   pvpetr = rating_functions.pvpetr(g.conn, cid)
   pvpetr = [["%s Level %d: %s to %s" % data for data in winloss] \
       for winloss in pvpetr]
-  return render_template("tcstats.html", cid=cid, handle=handle,
+  return render_template("tcstats.html", cid=cid, handle=handle, rating=rating,
       rounds=rounds, len_rounds=len(rounds),
-      pvpetr=pvpetr, asof=rating_functions.as_of(g.conn))
+      pvpetr=pvpetr, asof=rating_functions.as_of(g.conn),
+      compliment=rating_functions.get_compliment(rating))
 
 if __name__ == "__main__":
   app.run()

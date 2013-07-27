@@ -5,7 +5,7 @@
         href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
-    <h2 class="banner">[TCStats]</h2>
+    <h1 class="banner">[TCStats]</h1>
     {% block body %}{% endblock %}
     <span class="small">Stats are current as of {{ asof }}.</span>
   </body>
