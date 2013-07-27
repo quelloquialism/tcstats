@@ -32,20 +32,24 @@ def show_selector():
 def query_handle():
   try:
     handle = request.args["handle"]
+    cid = g.conn.execute("SELECT coder_id FROM coders WHERE handle = ?", \
+        [handle]).fetchone()[0]
   except:
-    handle = "Quelloquialism"
-  cid = g.conn.execute("SELECT coder_id FROM coders WHERE handle = ?", \
-      [handle]).fetchone()[0]
-  rounds = [row[0] for row in g.conn.execute(
-      "SELECT round_id FROM coder_rounds WHERE coder_id = ?", [cid]).fetchall()]
-  round_names = [row[0] for row in g.conn.execute(
+    return render_template("landing.html")
+
+  rounds = g.conn.execute(
+      "SELECT * FROM coder_rounds WHERE coder_id = ?", [cid]).fetchall()
+  round_ids = [row[7] for row in rounds]
+  round_names = g.conn.execute(
       "SELECT short_name FROM rounds WHERE round_id IN (" + \
-      ", ".join("?" * len(rounds)) + ")", rounds).fetchall()]
+      ", ".join("?" * len(rounds)) + ")", round_ids).fetchall()
+  for i in range(len(rounds)):
+    rounds[i] = round_names[i] + rounds[i][1:]
   pvpetr = rating_functions.pvpetr(g.conn, cid)
   pvpetr = [["%s Level %d: %s to %s" % data for data in winloss] \
       for winloss in pvpetr]
   return render_template("tcstats.html", cid=cid, handle=handle,
-      rounds=round_names, len_rounds=len(rounds),
+      rounds=rounds, len_rounds=len(rounds),
       pvpetr=pvpetr)
 
 if __name__ == "__main__":
