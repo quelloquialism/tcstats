@@ -55,23 +55,29 @@ def fetch_feeds(to_fetch):
   for (url, filename) in to_fetch:
     time.sleep(1) # throttle fetches to prevent flooding TC server
     log.info("Fetching %s to local file %s" % (url, filename))
-    fetched.append(filename)
-    try:
-      # TODO remove all these TODOs
-      # TODO this is very slow on connection failure, is there a way to 
-      #   config a timeout?
-      # TODO observed an instance of this hanging without any errors or return
-      #   for over 6 hours, this app can't work until i get rid of this
-      # TODO retry failed fetches?
-      # TODO maybe try the requests module i hate urllib
-      #(_, headers) = urllib.urlretrieve(url, filename)
-      req = requests.get(url, stream=True)
-      if req.status_code == 200:
-        with open(filename, 'wb') as feedfile:
-          for chunk in req.iter_content(1024):
-            feedfile.write(chunk)
-    except IOError, e: # TODO is IOError the only one urllib throws?
-      log.error("Caught error while fetching %s: %s" % (url, e))
+
+    success = False
+    for i in range(5):
+      try:
+        req = requests.get(url, stream=True, timeout=60)
+        if req.status_code == 200:
+          with open(filename, 'wb') as feedfile:
+            for chunk in req.iter_content(1024):
+              feedfile.write(chunk)
+          success = True
+        else:
+          log.error("Status code %s while fetching %s, retrying (%d of 5)" % \
+              (re.status_code, url, i + 1))
+      except: # TODO specific errors?
+        log.error("Caught error while fetching %s, retrying (%d of 5)" % \
+            (url, i + 1))
+      if success:
+        break
+    if not success:
+      log.error("Max retries for %s reached, skipping" % url)
+    else:
+      log.info("Successfully fetched %s" % url)
+      fetched.append(filename)
   return fetched
 
 def fetch_round_list():

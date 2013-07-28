@@ -5,11 +5,15 @@ Environment:
 Debian 6.0.7, 2.6.32-5-amd64 (probably works on other flavors as well, possibly
   with config tweaks)
 Python 2.6.6 (probably works on most 2.6.x/2.7.x versions)
+
+Python modules:
 Flask 0.10.1 (with Jinja 2.7 and Werkzeug 0.9.1)
+Requests 1.2.3
 
 To run:
 - install python 2.6/2.7
 - install pip
-- use pip to install flask
-- run "python tcstats.py" in the src directory
+- use pip to install flask and requests
+- run "python etl.py" in the src directory to download feeds and create db
+- run "python tcstats.py" in the src directory to launch app
 This should start up the flask app on http://localhost:5000/.
