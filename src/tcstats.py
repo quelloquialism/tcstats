@@ -3,16 +3,32 @@
 from flask import Flask, g, render_template, request, url_for
 # TODO only import what is used in the end
 from flask import session, redirect, abort, flash
+import logging
+from logging.handlers import TimedRotatingFileHandler
+import os.path
 import sqlite3
 
 app = Flask(__name__)
 app.config.from_object("config")
 app.config.from_envvar("TCSTATS_SETTINGS", silent=True)
 
+# this import must come after app.config is set up
 import rating_functions
 
+log_fhandler = TimedRotatingFileHandler(os.path.join(app.config["LOG_DIR"],
+    "app"), backupCount=app.config["LOG_BACKUPS"], when="midnight",
+    interval=1, utc=True)
+log_fmt = logging.Formatter(app.config["LOG_FORMAT"])
+app.logger.addHandler(log_fhandler)
+app.logger.setLevel(logging.DEBUG if app.config["DEBUG"] else logging.INFO)
+log_fhandler.setFormatter(log_fmt)
+log_fhandler.setLevel(logging.DEBUG if app.config["DEBUG"] else logging.INFO)
+
 def get_db_conn():
-  return sqlite3.connect(app.config["SQL_DB"])
+  conn = getattr(g, "conn", None)
+  if conn is None:
+    conn = sqlite3.connect(app.config["SQL_DB"])
+  return conn
 
 @app.before_request
 def before_request():
@@ -34,7 +50,8 @@ def query_handle():
     handle = request.args["handle"]
     cid, rating = g.conn.execute("SELECT coder_id, alg_rating FROM coders " + \
         "WHERE handle = ?", [handle]).fetchone()
-  except:
+  except: # TODO what errors?
+    app.logger.error("Caught error on tcstats request")
     return render_template("landing.html", asof=rating_functions.as_of(g.conn))
 
   rounds = g.conn.execute(
