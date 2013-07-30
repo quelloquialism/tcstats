@@ -57,12 +57,12 @@ def fetch_feeds(to_fetch):
     log.info("Fetching %s to local file %s" % (url, filename))
 
     success = False
-    for i in range(5):
+    for i in range(config["FETCH_RETRIES"]):
       try:
-        req = requests.get(url, stream=True, timeout=60)
+        req = requests.get(url, stream=True, timeout=config["FETCH_TIMEOUT"])
         if req.status_code == 200:
-          with open(filename, 'wb') as feedfile:
-            for chunk in req.iter_content(1024):
+          with open(filename, "wb") as feedfile:
+            for chunk in req.iter_content(config["FETCH_CHUNK_SIZE"]):
               feedfile.write(chunk)
           success = True
         else:

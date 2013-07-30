@@ -5,6 +5,9 @@ LOG_BACKUPS = 365
 LOG_FORMAT = \
     "%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d :: %(message)s"
 SQL_DB = "tc_data.db"
+FETCH_RETRIES = 5
+FETCH_TIMEOUT = 60 # seconds
+FETCH_CHUNK_SIZE = 1024 # bytes
 STATS_URL = "http://community.topcoder.com/tc?module=BasicData"
 ROUND_LIST_URL = STATS_URL + "&c=dd_round_list"
 ROUND_LIST_FILE = "/tmp/round_list.xml"
