@@ -93,7 +93,12 @@ def fetch_coder_list():
 def fetch_round_results(round_ids):
   fetched = fetch_feeds([(config["ROUND_RESULTS_URL"] % rid, \
       config["ROUND_RESULTS_FILE"] % rid) for rid in round_ids])
-  load_round_results(fetched)
+  fetched_ids = []
+  rid_start_index = config["ROUND_RESULTS_FILE"].index("%s")
+  rid_end_index = rid_start_index + 2 - len(config["ROUND_RESULTS_FILE"])
+  for filename in fetched:
+    fetched_ids.append(filename[rid_start_index : rid_end_index])
+  load_round_results(fetched_ids)
 
 def load_files(to_load, expected_keys):
   for (filename, sql) in to_load:
