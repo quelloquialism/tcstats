@@ -2,6 +2,7 @@ from tcstats import app
 
 import logging
 from logging.handlers import TimedRotatingFileHandler
+import os.path
 import requests
 import sqlite3
 import time
@@ -17,7 +18,7 @@ config = app.config
 #  2b) load_round_results(): load round_reounds into db
 
 # TODO who does log dir creation? also make sure permissions allow this
-log_fhandler = TimedRotatingFileHandler(config["LOG_DIR"] + "/etl", \
+log_fhandler = TimedRotatingFileHandler(os.path.join(config["LOG_DIR"], "etl"),
     backupCount=config["LOG_BACKUPS"], when="midnight", interval=1, utc=True)
 log_fmt = logging.Formatter(config["LOG_FORMAT"])
 log = logging.getLogger("etl")
