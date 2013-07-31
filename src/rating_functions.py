@@ -129,6 +129,11 @@ def pvpetr(conn, user_cid, opp_cid=10574855):
       for problem in range(3):
         user_score = results[cids[0]][problem]
         opp_score = results[cids[1]][problem]
+        # TODO remove when the nulls-in-db issue is fixed
+        if user_score is None:
+          user_score = 0.0
+        if opp_score is None:
+          opp_score = 0.0
         if user_score > opp_score:
           user_win.append((match_name, problem + 1, user_score, opp_score))
         elif user_score < opp_score:
