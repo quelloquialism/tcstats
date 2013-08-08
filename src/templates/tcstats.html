@@ -4,9 +4,11 @@
   <form action="{{ url_for('query_handle') }}" method="get">
     <p>Enter a TopCoder handle: <input type="text" size="30" name="handle"></p>
   </form>
+
   <p>Stats for {{ handle }} (id {{ cid }}).<br>
   {{ handle }} is {{ compliment }} coder (rating {{ rating }}).<br>
   Number of matches: {{ len_rounds }}.</p>
+
   <h2>Match History</h2>
   <ul>
   {% for round in rounds %}
@@ -15,13 +17,8 @@
     <li>None.</li>
   {% endfor %}
   </ul>
+
   <h2>PvPetr</h2>
-  {% for wl in pvpetr %}
-  <ul>
-  {% for problem in wl %}
-    <li>{{ problem }}</li>
-  {% endfor %}
-  </ul>
-  {% endfor %}
+  {{ pvpetr | safe }}
 </div>
 {% endblock %}

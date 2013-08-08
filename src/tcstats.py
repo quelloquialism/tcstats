@@ -8,6 +8,8 @@ from logging.handlers import TimedRotatingFileHandler
 import os.path
 import sqlite3
 
+import utils
+
 app = Flask(__name__)
 app.config.from_object("config")
 app.config.from_envvar("TCSTATS_SETTINGS", silent=True)
@@ -63,11 +65,18 @@ def query_handle():
   for i in range(len(rounds)):
     rounds[i] = round_names[i] + rounds[i][1:]
   pvpetr = rating_functions.pvpetr(g.conn, cid)
-  pvpetr = [["%s Level %d: %s to %s" % data for data in winloss] \
-      for winloss in pvpetr]
+  pvpetr_summary = "<p>Wins: %d / Losses: %d</p>" % \
+      (len(pvpetr[0]), len(pvpetr[1]))
+  pvpetr_wins_table = utils.make_table(pvpetr[0],
+      titles=["Match", "Problem", "%s Score" % handle, "Petr Score"],
+      format=["%s", "%s", "<b>%0.2f</b>", "%0.2f"])
+  pvpetr_losses_table = utils.make_table(pvpetr[1],
+      titles=["Match", "Problem", "%s Score" % handle, "Petr Score"],
+      format=["%s", "%s", "%0.2f", "<b>%0.2f</b>"])
+  pvpetr_section = pvpetr_summary + pvpetr_wins_table + pvpetr_losses_table
   return render_template("tcstats.html", cid=cid, handle=handle, rating=rating,
       rounds=rounds, len_rounds=len(rounds),
-      pvpetr=pvpetr, asof=rating_functions.as_of(g.conn),
+      pvpetr=pvpetr_section, asof=rating_functions.as_of(g.conn),
       compliment=rating_functions.get_compliment(rating))
 
 if __name__ == "__main__":
