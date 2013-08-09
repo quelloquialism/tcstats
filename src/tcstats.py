@@ -58,32 +58,52 @@ def query_handle():
     flash("Could not find a user with handle '%s'." % handle)
     return render_template("landing.html", asof=rating_functions.as_of(g.conn))
 
-  rounds = g.conn.execute(
-      "SELECT * FROM coder_rounds WHERE coder_id = ?", [cid]).fetchall()
-  round_ids = [row[7] for row in rounds]
-  round_names = g.conn.execute(
-      "SELECT short_name FROM rounds WHERE round_id IN (" + \
-      ", ".join("?" * len(rounds)) + ")", round_ids).fetchall()
-  for i in range(len(rounds)):
-    rounds[i] = round_names[i] + rounds[i][1:]
-  pvpetr = rating_functions.pvpetr(g.conn, cid)
-  pvpetr_summary = "<p>Wins: %d / Losses: %d</p>" % \
-      (len(pvpetr[0]), len(pvpetr[1]))
-  for dataset in pvpetr:
-    for i, row in enumerate(dataset):
-      dataset[i] = list(row)
-      dataset[i][1] = rating_functions.pname[row[1]]
-  pvpetr_wins_table = utils.make_table(pvpetr[0],
-      titles=["Match", "Problem", "%s Score" % handle, "Petr Score"],
-      format=["%s", "%s", "<b>%0.2f</b>", "%0.2f"])
-  pvpetr_losses_table = utils.make_table(pvpetr[1],
-      titles=["Match", "Problem", "%s Score" % handle, "Petr Score"],
-      format=["%s", "%s", "%0.2f", "<b>%0.2f</b>"])
-  pvpetr_section = pvpetr_summary + pvpetr_wins_table + pvpetr_losses_table
+  rounds = []
+  pvpetr = ""
+  asof = ""
+  compliment = ""
+  
+  try:
+    rounds = g.conn.execute(
+        "SELECT * FROM coder_rounds WHERE coder_id = ?", [cid]).fetchall()
+    round_ids = [row[7] for row in rounds]
+    round_names = g.conn.execute(
+        "SELECT short_name FROM rounds WHERE round_id IN (" + \
+        ", ".join("?" * len(rounds)) + ")", round_ids).fetchall()
+    for i in range(len(rounds)):
+      rounds[i] = round_names[i] + rounds[i][1:]
+  except: # TODO
+    flash("Failed to read round history for %s" % handle)
+
+  try:
+    pvpetr_data = rating_functions.pvpetr(g.conn, cid)
+    pvpetr_summary = "<p>Wins: %d / Losses: %d</p>" % \
+        (len(pvpetr_data[0]), len(pvpetr_data[1]))
+    for dataset in pvpetr_data:
+      for i, row in enumerate(dataset):
+        dataset[i] = list(row)
+        dataset[i][1] = rating_functions.pname[row[1]]
+    pvpetr_wins_table = utils.make_table(pvpetr_data[0],
+        titles=["Match", "Problem", "%s Score" % handle, "Petr Score"],
+        format=["%s", "%s", "<b>%0.2f</b>", "%0.2f"])
+    pvpetr_losses_table = utils.make_table(pvpetr_data[1],
+        titles=["Match", "Problem", "%s Score" % handle, "Petr Score"],
+        format=["%s", "%s", "%0.2f", "<b>%0.2f</b>"])
+    pvpetr = pvpetr_summary + pvpetr_wins_table + pvpetr_losses_table
+  except: # TODO
+    flash("Failed to read PvPetr for %s" % handle)
+
+  try:
+    asof = rating_functions.as_of(g.conn)
+  except: # TODO
+    flash("Failed to read last match time")
+
+  compliment = rating_functions.get_compliment(rating)
+
   return render_template("tcstats.html", cid=cid, handle=handle, rating=rating,
       rounds=rounds, len_rounds=len(rounds),
-      pvpetr=pvpetr_section, asof=rating_functions.as_of(g.conn),
-      compliment=rating_functions.get_compliment(rating))
+      pvpetr=pvpetr, asof=asof,
+      compliment=compliment)
 
 if __name__ == "__main__":
   app.run()
