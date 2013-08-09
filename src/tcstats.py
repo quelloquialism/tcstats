@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
-from flask import Flask, g, render_template, request, url_for
+from flask import Flask, flash, g, render_template, request, url_for
 # TODO only import what is used in the end
-from flask import session, redirect, abort, flash
+from flask import session, redirect, abort
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import os.path
@@ -13,6 +13,7 @@ import utils
 app = Flask(__name__)
 app.config.from_object("config")
 app.config.from_envvar("TCSTATS_SETTINGS", silent=True)
+app.secret_key = "not secret"
 
 # this import must come after app.config is set up
 import rating_functions
@@ -54,6 +55,7 @@ def query_handle():
         "WHERE handle = ?", [handle]).fetchone()
   except: # TODO what errors?
     app.logger.error("Caught error on tcstats request")
+    flash("Could not find a user with handle '%s'." % handle)
     return render_template("landing.html", asof=rating_functions.as_of(g.conn))
 
   rounds = g.conn.execute(
