@@ -66,6 +66,7 @@ def query_handle():
   try:
     rounds = g.conn.execute(
         "SELECT * FROM coder_rounds WHERE coder_id = ?", [cid]).fetchall()
+    num_rounds = len(rounds)
     round_ids = [row[7] for row in rounds]
     round_names = g.conn.execute(
         "SELECT short_name FROM rounds WHERE round_id IN (" + \
@@ -110,7 +111,7 @@ def query_handle():
   compliment = rating_functions.get_compliment(rating)
 
   return render_template("tcstats.html", cid=cid, handle=handle, rating=rating,
-      rounds=rounds, len_rounds=len(rounds),
+      rounds=rounds, num_rounds=num_rounds,
       pvpetr=pvpetr, asof=asof,
       compliment=compliment)
 
