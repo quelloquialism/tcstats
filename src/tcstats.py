@@ -67,6 +67,10 @@ def query_handle():
   pvpetr = rating_functions.pvpetr(g.conn, cid)
   pvpetr_summary = "<p>Wins: %d / Losses: %d</p>" % \
       (len(pvpetr[0]), len(pvpetr[1]))
+  for dataset in pvpetr:
+    for i, row in enumerate(dataset):
+      dataset[i] = list(row)
+      dataset[i][1] = rating_functions.pname[row[1]]
   pvpetr_wins_table = utils.make_table(pvpetr[0],
       titles=["Match", "Problem", "%s Score" % handle, "Petr Score"],
       format=["%s", "%s", "<b>%0.2f</b>", "%0.2f"])
