@@ -49,12 +49,12 @@ def show_selector():
 
 @app.route("/tcstats", methods=["GET"])
 def query_handle():
+  handle = None
   try:
     handle = request.args["handle"]
     cid, rating = g.conn.execute("SELECT coder_id, alg_rating FROM coders " + \
         "WHERE handle = ?", [handle]).fetchone()
   except: # TODO what errors?
-    app.logger.error("Caught error on tcstats request")
     flash("Could not find a user with handle '%s'." % handle)
     return render_template("landing.html", asof=rating_functions.as_of(g.conn))
 
@@ -76,7 +76,9 @@ def query_handle():
         titles=["Match", "Div", "Rank", "New Rating", "New Volatility",
             "Old Rating", "Room Rank"])
   except: # TODO
-    flash("Failed to read round history for %s" % handle)
+    error_msg = "Failed to read round history for %s" % handle
+    app.logger.error(error_msg)
+    flash(error_msg)
 
   try:
     pvpetr_data = rating_functions.pvpetr(g.conn, cid)
@@ -94,12 +96,16 @@ def query_handle():
         format=["%s", "%s", "%0.2f", "<b>%0.2f</b>"])
     pvpetr = pvpetr_summary + pvpetr_wins_table + pvpetr_losses_table
   except: # TODO
-    flash("Failed to read PvPetr for %s" % handle)
+    error_msg = "Failed to read PvPetr for %s" % handle
+    app.logger.error(error_msg)
+    flash(error_msg)
 
   try:
     asof = rating_functions.as_of(g.conn)
   except: # TODO
-    flash("Failed to read last match time")
+    error_msg = "Failed to read last match time"
+    app.logger.error(error_msg)
+    flash(error_msg)
 
   compliment = rating_functions.get_compliment(rating)
 
