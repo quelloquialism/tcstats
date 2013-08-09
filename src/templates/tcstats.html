@@ -10,13 +10,7 @@
   Number of matches: {{ len_rounds }}.</p>
 
   <h2>Match History</h2>
-  <ul>
-  {% for round in rounds %}
-    <li>{{ round }}</li>
-  {% else %}
-    <li>None.</li>
-  {% endfor %}
-  </ul>
+  {{ rounds | safe }}
 
   <h2>PvPetr</h2>
   {{ pvpetr | safe }}

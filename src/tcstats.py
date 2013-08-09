@@ -71,7 +71,10 @@ def query_handle():
         "SELECT short_name FROM rounds WHERE round_id IN (" + \
         ", ".join("?" * len(rounds)) + ")", round_ids).fetchall()
     for i in range(len(rounds)):
-      rounds[i] = round_names[i] + rounds[i][1:]
+      rounds[i] = round_names[i] + rounds[i][1:-1]
+    rounds = utils.make_table(rounds,
+        titles=["Match", "Div", "Rank", "New Rating", "New Volatility",
+            "Old Rating", "Room Rank"])
   except: # TODO
     flash("Failed to read round history for %s" % handle)
 
