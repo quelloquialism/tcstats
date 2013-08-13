@@ -16,7 +16,6 @@ CODER_LIST_FILE = "/tmp/coder_list.xml"
 ROUND_RESULTS_URL = STATS_URL + "&c=dd_round_results&rd=%s"
 ROUND_RESULTS_FILE = "/tmp/round_results_%s.xml"
 
-# TODO would sqlalchemy help with this mess?
 ROUND_LIST_HEAD = sorted([
   ("round_id", "integer", "primary key"),
   ("full_name", "text"),
@@ -45,9 +44,10 @@ CODER_LIST_HEAD = sorted([
 ])
 
 ROUND_RESULTS_HEAD = sorted([
+  ("round_id", "integer"),
   ("room_id", "integer"),
   ("room_name", "text"),
-  ("coder_id", "integer", "primary key"),
+  ("coder_id", "integer"),
   ("handle", "text"),
   ("paid", "text"),
   ("old_rating", "integer"),
@@ -97,17 +97,6 @@ ROUND_RESULTS_HEAD = sorted([
   ("level_three_status", "text"),
   ("level_three_time_elapsed", "integer"),
   ("level_three_placed", "integer"),
-  ("level_three_language", "text")
-])
-
-CODER_ROUNDS_HEAD = sorted([
-  ("coder_id", "integer"),
-  ("round_id", "integer"),
-  ("division", "integer"),
-  ("old_rating", "integer"),
-  ("new_rating", "integer"),
-  ("new_vol", "integer"),
-  ("division_placed", "integer"),
-  ("room_placed", "integer"),
+  ("level_three_language", "text"),
   ("unique", "(coder_id, round_id)")
 ])
