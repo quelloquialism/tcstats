@@ -27,21 +27,6 @@ log.setLevel(logging.DEBUG if config["DEBUG"] else logging.INFO)
 log_fhandler.setFormatter(log_fmt)
 log_fhandler.setLevel(logging.DEBUG if config["DEBUG"] else logging.INFO)
 
-def keys_table(head, table_name):
-  keys = [r[0] for r in head]
-  table = "CREATE TABLE IF NOT EXISTS " + table_name + " (" + \
-      ",".join([" ".join(field) for field in head]) + ")"
-  return keys, table
-
-round_list_keys, round_list_table = keys_table(
-    config["ROUND_LIST_HEAD"], "rounds")
-round_results_keys, round_results_table = keys_table(
-    config["ROUND_RESULTS_HEAD"], "results_%s")
-coder_list_keys, coder_list_table = keys_table(
-    config["CODER_LIST_HEAD"], "coders")
-coder_rounds_keys, coder_rounds_table = keys_table(
-    config["CODER_ROUNDS_HEAD"], "coder_rounds")
-
 conn = sqlite3.connect(config["SQL_DB"])
 cursor = conn.cursor()
 
@@ -123,8 +108,6 @@ def load_files(to_load, expected_keys):
   conn.commit()
 
 def load_round_list():
-  log.info("Creating round list table 'rounds'")
-  cursor.execute(round_list_table)
   field_ct = len(config["ROUND_LIST_HEAD"])
   insert_sql = "REPLACE INTO rounds VALUES (" + \
       ",".join("?" * field_ct) + ")"
@@ -132,8 +115,6 @@ def load_round_list():
   log.info("Finished loading round list")
 
 def load_coder_list():
-  log.info("Creating coder list table 'coders'")
-  cursor.execute(coder_list_table)
   field_ct = len(config["CODER_LIST_HEAD"])
   insert_sql = "REPLACE INTO coders VALUES (" + \
       ",".join("?" * field_ct) + ")"
@@ -141,38 +122,12 @@ def load_coder_list():
   log.info("Finishing loading coder list")
 
 def load_round_results(round_ids):
-  for rid in round_ids:
-    log.info("Creating round results table 'results_%s'" % rid)
-    cursor.execute(round_results_table % rid)
   field_ct = len(config["ROUND_RESULTS_HEAD"])
   insert_sql = "REPLACE INTO results_%s VALUES (" + \
       ",".join("?" * field_ct) + ")"
   load_files([(config["ROUND_RESULTS_FILE"] % rid, \
       insert_sql % rid) for rid in round_ids], round_results_keys)
   log.info("Finished loading %s round results" % len(round_ids))
-  update_coder_rounds_mapping(round_ids)
-
-def update_coder_rounds_mapping(round_ids):
-  log.info("Creating coder-rounds mapping table 'coder_rounds'")
-  cursor.execute(coder_rounds_table)
-  log.info("Writing mappings for %s rounds" % len(round_ids))
-  fetch_keys = []
-  for key in coder_rounds_keys:
-    if "unique" not in key and key != "round_id":
-      fetch_keys.append(key)
-  for rid in round_ids:
-    select_sql = "SELECT %s FROM results_%s" % (", ".join(fetch_keys), rid)
-    insert_sql = "REPLACE INTO coder_rounds VALUES (" + \
-        ",".join("?" * (len(coder_rounds_keys) - 1)) + ")"
-    commands = []
-    for row in cursor.execute(select_sql):
-      datamap = {"round_id": rid}
-      for i in range(len(row)):
-        datamap[fetch_keys[i]] = row[i]
-      commands.append([datamap[k] for k in sorted(datamap)])
-    cursor.executemany(insert_sql, commands)
-  conn.commit()
-  log.info("Mappings complete")
 
 def full_run():
   fetch_round_list()
