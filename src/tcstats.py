@@ -45,18 +45,21 @@ def teardown_request(exception):
 
 @app.route("/")
 def show_selector():
-  return render_template("landing.html", asof=rating_functions.as_of(g.conn))
+  return render_template("landing.html", 
+      asof=rating_functions.as_of(get_db_conn()))
 
 @app.route("/tcstats", methods=["GET"])
 def query_handle():
   handle = None
   try:
     handle = request.args["handle"]
-    cid, rating = g.conn.execute("SELECT coder_id, alg_rating FROM coders " + \
+    conn = get_db_conn()
+    cur = conn.cursor()
+    cid, rating = cur.execute("SELECT coder_id, alg_rating FROM coders " + \
         "WHERE handle = ?", [handle]).fetchone()
   except: # TODO what errors?
     flash("Could not find a user with handle '%s'." % handle)
-    return render_template("landing.html", asof=rating_functions.as_of(g.conn))
+    return render_template("landing.html", asof=rating_functions.as_of(conn))
 
   rounds = []
   pvpetr = ""
@@ -64,11 +67,11 @@ def query_handle():
   compliment = ""
   
   try:
-    rounds = g.conn.execute(
+    rounds = cur.execute(
         "SELECT * FROM coder_rounds WHERE coder_id = ?", [cid]).fetchall()
     num_rounds = len(rounds)
     round_ids = [row[7] for row in rounds]
-    round_names = g.conn.execute(
+    round_names = cur.execute(
         "SELECT short_name FROM rounds WHERE round_id IN (" + \
         ", ".join("?" * len(rounds)) + ")", round_ids).fetchall()
     for i in range(len(rounds)):
@@ -82,7 +85,7 @@ def query_handle():
     flash(error_msg)
 
   try:
-    pvpetr_data = rating_functions.pvpetr(g.conn, cid)
+    pvpetr_data = rating_functions.pvpetr(conn, cid)
     pvpetr_summary = "<p>Wins: %d / Losses: %d</p>" % \
         (len(pvpetr_data[0]), len(pvpetr_data[1]))
     for dataset in pvpetr_data:
@@ -102,7 +105,7 @@ def query_handle():
     flash(error_msg)
 
   try:
-    asof = rating_functions.as_of(g.conn)
+    asof = rating_functions.as_of(conn)
   except: # TODO
     error_msg = "Failed to read last match time"
     app.logger.error(error_msg)
