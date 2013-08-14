@@ -39,7 +39,7 @@ def read_row(row):
 def fetch_feeds(to_fetch):
   fetched = []
   for (url, filename) in to_fetch:
-    time.sleep(1) # throttle fetches to prevent flooding TC server
+    time.sleep(config["FETCH_SLEEP"])
     log.info("Fetching %s to local file %s" % (url, filename))
 
     success = False
