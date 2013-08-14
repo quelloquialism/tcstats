@@ -66,31 +66,6 @@ def fetch_feeds(to_fetch):
       fetched.append(filename)
   return fetched
 
-def fetch_round_list():
-  fetched = fetch_feeds([(config["ROUND_LIST_URL"], config["ROUND_LIST_FILE"])])
-  if len(fetched) > 0:
-    load_files([config["ROUND_LIST_FILE"]], config["ROUND_TABLE"])
-    log.info("Finished loading round list")
-
-def fetch_coder_list():
-  fetched = fetch_feeds([(config["CODER_LIST_URL"], config["CODER_LIST_FILE"])])
-  if len(fetched) > 0:
-    load_files([config["CODER_LIST_FILE"]], config["CODER_TABLE"])
-    log.info("Finishing loading coder list")
-
-def fetch_round_results(round_ids):
-  fetched = fetch_feeds([(config["RESULTS_URL"] % rid, \
-      config["RESULTS_FILE"] % rid) for rid in round_ids])
-  fetched_ids = []
-  rid_start_index = config["RESULTS_FILE"].index("%s")
-  rid_end_index = rid_start_index + 2 - len(config["RESULTS_FILE"])
-  for filename in fetched:
-    fetched_ids.append(filename[rid_start_index : rid_end_index])
-  load_round_results(fetched_ids)
-  load_files([config["RESULTS_FILE"] % rid for rid in fetched_ids],
-      config["RESULTS_TABLE"])
-  log.info("Finished loading %s round results" % len(fetched_ids))
-
 def load_files(files, table):
   for filename in files:
     log.info("Loading %s into db" % filename)
@@ -112,6 +87,25 @@ def load_files(files, table):
             (filename, i))
     cursor.executemany(sql, data)
   conn.commit()
+
+def fetch_round_list():
+  fetched = fetch_feeds([(config["ROUND_LIST_URL"], config["ROUND_LIST_FILE"])])
+  if len(fetched) > 0:
+    load_files(fetched, config["ROUND_TABLE"])
+    log.info("Finished loading round list")
+
+def fetch_coder_list():
+  fetched = fetch_feeds([(config["CODER_LIST_URL"], config["CODER_LIST_FILE"])])
+  if len(fetched) > 0:
+    load_files(fetched, config["CODER_TABLE"])
+    log.info("Finishing loading coder list")
+
+def fetch_round_results(round_ids):
+  fetched = fetch_feeds([(config["RESULTS_URL"] % rid, \
+      config["RESULTS_FILE"] % rid) for rid in round_ids])
+  if len(fetched) > 0:
+    load_files(fetched, config["RESULTS_TABLE"])
+    log.info("Finished loading %s round results" % len(fetched))
 
 def full_run():
   fetch_round_list()
