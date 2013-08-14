@@ -79,15 +79,15 @@ def fetch_coder_list():
     log.info("Finishing loading coder list")
 
 def fetch_round_results(round_ids):
-  fetched = fetch_feeds([(config["ROUND_RESULTS_URL"] % rid, \
-      config["ROUND_RESULTS_FILE"] % rid) for rid in round_ids])
+  fetched = fetch_feeds([(config["RESULTS_URL"] % rid, \
+      config["RESULTS_FILE"] % rid) for rid in round_ids])
   fetched_ids = []
-  rid_start_index = config["ROUND_RESULTS_FILE"].index("%s")
-  rid_end_index = rid_start_index + 2 - len(config["ROUND_RESULTS_FILE"])
+  rid_start_index = config["RESULTS_FILE"].index("%s")
+  rid_end_index = rid_start_index + 2 - len(config["RESULTS_FILE"])
   for filename in fetched:
     fetched_ids.append(filename[rid_start_index : rid_end_index])
   load_round_results(fetched_ids)
-  load_files([config["ROUND_RESULTS_FILE"] % rid for rid in fetched_ids],
+  load_files([config["RESULTS_FILE"] % rid for rid in fetched_ids],
       config["RESULTS_TABLE"])
   log.info("Finished loading %s round results" % len(fetched_ids))
 
