@@ -69,12 +69,14 @@ def fetch_feeds(to_fetch):
 def fetch_round_list():
   fetched = fetch_feeds([(config["ROUND_LIST_URL"], config["ROUND_LIST_FILE"])])
   if len(fetched) > 0:
-    load_round_list()
+    load_files([config["ROUND_LIST_FILE"]], config["ROUND_TABLE"])
+    log.info("Finished loading round list")
 
 def fetch_coder_list():
   fetched = fetch_feeds([(config["CODER_LIST_URL"], config["CODER_LIST_FILE"])])
   if len(fetched) > 0:
-    load_coder_list()
+    load_files([config["CODER_LIST_FILE"]], config["CODER_TABLE"])
+    log.info("Finishing loading coder list")
 
 def fetch_round_results(round_ids):
   fetched = fetch_feeds([(config["ROUND_RESULTS_URL"] % rid, \
@@ -85,9 +87,12 @@ def fetch_round_results(round_ids):
   for filename in fetched:
     fetched_ids.append(filename[rid_start_index : rid_end_index])
   load_round_results(fetched_ids)
+  load_files([config["ROUND_RESULTS_FILE"] % rid for rid in fetched_ids],
+      config["RESULTS_TABLE"])
+  log.info("Finished loading %s round results" % len(fetched_ids))
 
-def load_files(to_load, expected_keys):
-  for (filename, sql) in to_load:
+def load_files(files, table):
+  for filename in files:
     log.info("Loading %s into db" % filename)
     data = []
     try:
@@ -97,37 +102,16 @@ def load_files(to_load, expected_keys):
         data.append(read_row(row))
     except: # TODO what kind of errors can this throw? IO? Parse?
       log.error("Failed to parse %s" % filename)
+    expected_keys = None
     for i in xrange(len(data)):
       keys = sorted(data[i].keys())
-      if keys == expected_keys:
-        data[i] = [data[i][x] for x in keys]
-      else:
+      if expected_keys is None:
+        expected_keys = keys
+      elif keys != expected_keys:
         log.error("%s row %s does not match expected schema, skipping" % \
             (filename, i))
     cursor.executemany(sql, data)
   conn.commit()
-
-def load_round_list():
-  field_ct = len(config["ROUND_LIST_HEAD"])
-  insert_sql = "REPLACE INTO rounds VALUES (" + \
-      ",".join("?" * field_ct) + ")"
-  load_files([(config["ROUND_LIST_FILE"], insert_sql)], round_list_keys)
-  log.info("Finished loading round list")
-
-def load_coder_list():
-  field_ct = len(config["CODER_LIST_HEAD"])
-  insert_sql = "REPLACE INTO coders VALUES (" + \
-      ",".join("?" * field_ct) + ")"
-  load_files([(config["CODER_LIST_FILE"], insert_sql)], coder_list_keys)
-  log.info("Finishing loading coder list")
-
-def load_round_results(round_ids):
-  field_ct = len(config["ROUND_RESULTS_HEAD"])
-  insert_sql = "REPLACE INTO results_%s VALUES (" + \
-      ",".join("?" * field_ct) + ")"
-  load_files([(config["ROUND_RESULTS_FILE"] % rid, \
-      insert_sql % rid) for rid in round_ids], round_results_keys)
-  log.info("Finished loading %s round results" % len(round_ids))
 
 def full_run():
   fetch_round_list()
