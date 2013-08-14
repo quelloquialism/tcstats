@@ -67,6 +67,7 @@ def fetch_feeds(to_fetch):
   return fetched
 
 def load_files(files, table):
+  sql = "REPLACE INTO " + table + " (%s) VALUES (%s)"
   for filename in files:
     log.info("Loading %s into db" % filename)
     data = []
@@ -85,7 +86,9 @@ def load_files(files, table):
       elif keys != expected_keys:
         log.error("%s row %s does not match expected schema, skipping" % \
             (filename, i))
-    cursor.executemany(sql, data)
+    placeholders = [":" + key for key in expected_keys]
+    cursor.executemany(sql % (",".join(expected_keys),
+        ",".join(placeholders)), data)
   conn.commit()
 
 def fetch_round_list():
