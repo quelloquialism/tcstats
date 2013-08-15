@@ -86,5 +86,5 @@ CREATE TABLE results (
   level_three_time_elapsed integer,
   level_three_placed integer,
   level_three_language text,
-  unique coder_id round_id
+  unique (coder_id, round_id)
 );

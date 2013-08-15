@@ -11,12 +11,6 @@ import xml.etree.cElementTree as ET
 
 config = app.config
 
-# Program execution flow:
-#  1a) fetch_round_list(): download the round_list xml, call load
-#  1b) load_round_list(): load round_list into db
-#  2a) fetch_round_results(): download all round_results xmls, call load
-#  2b) load_round_results(): load round_reounds into db
-
 # TODO who does log dir creation? also make sure permissions allow this
 log_fhandler = TimedRotatingFileHandler(os.path.join(config["LOG_DIR"], "etl"),
     backupCount=config["LOG_BACKUPS"], when="midnight", interval=1, utc=True)
@@ -29,6 +23,12 @@ log_fhandler.setLevel(logging.DEBUG if config["DEBUG"] else logging.INFO)
 
 conn = sqlite3.connect(config["SQL_DB"])
 cursor = conn.cursor()
+
+def create_tables():
+  try:
+    cursor.executescript(open("schema.sql").read())
+  except: # TODO
+    log.error("Error executing schema.sql")
 
 def read_row(row):
   row_data = {}
@@ -52,10 +52,10 @@ def fetch_feeds(to_fetch):
               feedfile.write(chunk)
           success = True
         else:
-          log.error("Status code %s while fetching %s, retrying (%d of 5)" % \
+          log.warn("Status code %s while fetching %s, retrying (%d of 5)" % \
               (re.status_code, url, i + 1))
       except: # TODO specific errors?
-        log.error("Caught error while fetching %s, retrying (%d of 5)" % \
+        log.warn("Caught error while fetching %s, retrying (%d of 5)" % \
             (url, i + 1))
       if success:
         break
@@ -89,9 +89,10 @@ def load_files(files, table, extra_data=[]):
       elif keys != expected_keys:
         log.error("%s row %s does not match expected schema, skipping" % \
             (filename, i))
-    placeholders = [":" + key for key in expected_keys]
-    cursor.executemany(sql % (",".join(expected_keys),
-        ",".join(placeholders)), data)
+    if expected_keys is not None:
+      placeholders = [":" + key for key in expected_keys]
+      cursor.executemany(sql % (",".join(expected_keys),
+          ",".join(placeholders)), data)
   conn.commit()
 
 def fetch_round_list():
@@ -116,6 +117,7 @@ def fetch_round_results(round_ids):
     log.info("Finished loading %s round results" % len(fetched))
 
 def full_run():
+  create_tables()
   fetch_round_list()
   fetch_coder_list()
   round_ids = [row[0] for row in cursor.execute("SELECT round_id FROM rounds")]
