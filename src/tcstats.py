@@ -31,6 +31,7 @@ def get_db_conn():
   conn = getattr(g, "conn", None)
   if conn is None:
     conn = sqlite3.connect(app.config["SQL_DB"])
+    conn.row_factory = sqlite3.Row
   return conn
 
 @app.before_request

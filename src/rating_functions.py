@@ -106,27 +106,23 @@ def get_round_accomplishments(coder, limit):
 def pvpetr(conn, user_cid, opp_cid=10574855):
   cursor = conn.cursor()
   cids = [user_cid, opp_cid]
-  find_matches = "SELECT round_id FROM coder_rounds WHERE coder_id=%s"
-  find_match_scores = "SELECT level_one_final_points, " + \
-      "level_two_final_points, level_three_final_points, " + \
-      "division FROM results_%s WHERE coder_id=%s"
+  fields = ",".join(["round_id", "division"] + \
+      ["level_%s_final_points" % level for level in ("one", "two", "three")])
+  find_match_scores = "SELECT " + fields + " FROM results WHERE coder_id=%s"
   find_match_name = "SELECT short_name FROM rounds WHERE round_id=%s"
-  matches = defaultdict(int)
+  matches = defaultdict(dict)
   for cid in cids:
-    for row in cursor.execute(find_matches % cid):
-      matches[row[0]] += 1
+    for row in cursor.execute(find_match_scores % cid):
+      matches[row[0]][cid] = (row[1], row[2], row[3], row[4])
   user_win = []
   opp_win = []
   for round_id in matches:
-    if matches[round_id] == 2:
+    results = matches[round_id]
+    if len(results) == 2:
       match_name = cursor.execute(find_match_name % round_id).fetchone()[0]
-      results = {}
-      for cid in cids:
-        results[cid] = \
-            cursor.execute(find_match_scores % (round_id, cid)).fetchone()
-      if results[cids[0]][3] != results[cids[1]][3]:
+      if results[cids[0]][0] != results[cids[1]][0]:
         continue
-      for problem in range(3):
+      for problem in range(1, 4):
         user_score = results[cids[0]][problem]
         opp_score = results[cids[1]][problem]
         # TODO remove when the nulls-in-db issue is fixed
@@ -135,7 +131,7 @@ def pvpetr(conn, user_cid, opp_cid=10574855):
         if opp_score is None:
           opp_score = 0.0
         if user_score > opp_score:
-          user_win.append((match_name, problem + 1, user_score, opp_score))
+          user_win.append((match_name, problem, user_score, opp_score))
         elif user_score < opp_score:
-          opp_win.append((match_name, problem + 1, user_score, opp_score))
+          opp_win.append((match_name, problem, user_score, opp_score))
   return (user_win, opp_win)
