@@ -1,7 +1,7 @@
 # TCStats Flask configuration file
 DEBUG = True
 LOG_DIR = "/var/log/tcstats"
-LOG_BACKUPS = 365
+LOG_BACKUPS = 365 # days
 LOG_FORMAT = \
     "%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d :: %(message)s"
 SQL_DB = "tc_data.db"
