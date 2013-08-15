@@ -66,16 +66,19 @@ def fetch_feeds(to_fetch):
       fetched.append(filename)
   return fetched
 
-def load_files(files, table):
+def load_files(files, table, extra_data=[]):
   sql = "REPLACE INTO " + table + " (%s) VALUES (%s)"
-  for filename in files:
+  for f, filename in enumerate(files):
     log.info("Loading %s into db" % filename)
     data = []
     try:
       feed_et = ET.parse(filename)
       feed_root = feed_et.getroot()
       for row in feed_root:
-        data.append(read_row(row))
+        row_data = read_row(row)
+        if len(extra_data) > f:
+          row_data.update(extra_data[f])
+        data.append(row_data)
     except: # TODO what kind of errors can this throw? IO? Parse?
       log.error("Failed to parse %s" % filename)
     expected_keys = None
@@ -107,7 +110,9 @@ def fetch_round_results(round_ids):
   fetched = fetch_feeds([(config["RESULTS_URL"] % rid, \
       config["RESULTS_FILE"] % rid) for rid in round_ids])
   if len(fetched) > 0:
-    load_files(fetched, config["RESULTS_TABLE"])
+    load_files([config["RESULTS_FILE"] % rid for rid in round_ids],
+        config["RESULTS_TABLE"],
+        [{"round_id": rid} for rid in round_ids])
     log.info("Finished loading %s round results" % len(fetched))
 
 def full_run():
