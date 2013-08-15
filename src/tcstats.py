@@ -63,22 +63,23 @@ def query_handle():
     return render_template("landing.html", asof=rating_functions.as_of(conn))
 
   rounds = []
+  num_rounds = 0
   pvpetr = ""
   asof = ""
   compliment = ""
   
   try:
-    fields = ("coder_id", "division", "division_placed", "new_rating",
-        "new_vol", "old_rating", "room_placed", "round_id")
+    fields = ",".join(("coder_id", "division", "division_placed", "new_rating",
+        "new_vol", "old_rating", "room_placed", "round_id"))
     rounds = cur.execute(
-        "SELECT %s FROM results WHERE coder_id = ?", [cid]).fetchall()
+        "SELECT %s FROM results WHERE coder_id = ?" % fields, [cid]).fetchall()
     num_rounds = len(rounds)
     round_ids = [row["round_id"] for row in rounds]
     round_names = cur.execute(
         "SELECT short_name FROM rounds WHERE round_id IN (" + \
         ", ".join("?" * len(rounds)) + ")", round_ids).fetchall()
     for i in range(len(rounds)):
-      rounds[i] = round_names[i] + rounds[i][1:-1]
+      rounds[i] = list(round_names[i]) + list(rounds[i])[1:-1]
     rounds = utils.make_table(rounds,
         titles=["Match", "Div", "Rank", "New Rating", "New Volatility",
             "Old Rating", "Room Rank"])
