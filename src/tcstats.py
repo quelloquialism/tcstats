@@ -68,10 +68,12 @@ def query_handle():
   compliment = ""
   
   try:
+    fields = ("coder_id", "division", "division_placed", "new_rating",
+        "new_vol", "old_rating", "room_placed", "round_id")
     rounds = cur.execute(
-        "SELECT * FROM coder_rounds WHERE coder_id = ?", [cid]).fetchall()
+        "SELECT %s FROM results WHERE coder_id = ?", [cid]).fetchall()
     num_rounds = len(rounds)
-    round_ids = [row[7] for row in rounds]
+    round_ids = [row["round_id"] for row in rounds]
     round_names = cur.execute(
         "SELECT short_name FROM rounds WHERE round_id IN (" + \
         ", ".join("?" * len(rounds)) + ")", round_ids).fetchall()
