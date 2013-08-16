@@ -116,6 +116,24 @@ def fetch_round_results(round_ids):
         [{"round_id": rid} for rid in round_ids])
     log.info("Finished loading %s round results" % len(fetched))
 
+def calculate_old_vol():
+  vols = defaultdict(lambda: config["STARTING_VOL"])
+  rounds_sql = "SELECT round_id FROM rounds ORDER BY date"
+  coders_sql = "SELECT coder_id FROM results WHERE round_id = ?"
+  update_sql = "UPDATE results (old_vol = ?) " + \
+      "WHERE coder_id = ? AND round_id = ?" # TODO what is UPDATE syntax?
+  new_vol_sql = "SELECT new_vol FROM results " + \
+      "WHERE coder_id = ? AND round_id = ?"
+  round_ids = [row[0] for row in cursor.execute(rounds_sql)]
+  for rid in round_ids:
+    coders = [row[0] for row in cursor.execute(coders_sql, rid)]
+    update_args = [(vols[cid], cid, rid) for cid in coders]
+    cursor.executemany(update_sql, update_args)
+    for cid in coders:
+      new_vol = cursor.execute().fetchone()[0]
+      vols[cid] = new_vol
+  conn.commit()
+
 def full_run():
   create_tables()
   fetch_round_list()

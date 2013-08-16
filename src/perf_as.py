@@ -39,7 +39,6 @@ def calc_perf_as(user, rank, coders):
   return user[0] + competition_factor * (actual_perf - expected_perf)
 
 def calc_new_rating_vol(user, rank, played, coders):
-  # TODO old_vol isn't provided by the data feeds
   rating, vol = user["old_rating"], user["old_vol"]
   perf_as = calc_perf_as(user, rank, coders)
   weight = 1 / (1 - (0.42 / (played + 1) + 0.18)) - 1

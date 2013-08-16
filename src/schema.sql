@@ -40,6 +40,7 @@ CREATE TABLE results (
   paid text,
   old_rating integer,
   new_rating integer,
+  old_vol integer,
   new_vol integer,
   num_ratings integer,
   room_placed integer,
