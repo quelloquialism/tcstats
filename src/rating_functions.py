@@ -112,14 +112,14 @@ def pvpetr(conn, user_cid, opp_cid=10574855):
   find_match_name = "SELECT short_name FROM rounds WHERE round_id = ?"
   matches = defaultdict(dict)
   for cid in cids:
-    for row in cursor.execute(find_match_scores, cid):
+    for row in cursor.execute(find_match_scores, [cid]):
       matches[row[0]][cid] = (row[1], row[2], row[3], row[4])
   user_win = []
   opp_win = []
   for round_id in matches:
     results = matches[round_id]
     if len(results) == 2:
-      match_name = cursor.execute(find_match_name, round_id).fetchone()[0]
+      match_name = cursor.execute(find_match_name, [round_id]).fetchone()[0]
       if results[cids[0]][0] != results[cids[1]][0]:
         continue
       for problem in range(1, 4):
