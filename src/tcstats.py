@@ -58,7 +58,7 @@ def query_handle():
     cur = conn.cursor()
     cid, rating = cur.execute("SELECT coder_id, alg_rating FROM coders " + \
         "WHERE handle = ?", [handle]).fetchone()
-  except: # TODO what errors?
+  except Exception, e: # TODO what errors?
     flash("Could not find a user with handle '%s'." % handle)
     return render_template("landing.html", asof=rating_functions.as_of(conn))
 
@@ -83,8 +83,8 @@ def query_handle():
     rounds = utils.make_table(rounds,
         titles=["Match", "Div", "Rank", "New Rating", "New Volatility",
             "Old Rating", "Room Rank"])
-  except: # TODO
-    error_msg = "Failed to read round history for %s" % handle
+  except Exception, e: # TODO
+    error_msg = "Failed to read round history for %s: %s" % (handle, e)
     app.logger.error(error_msg)
     flash(error_msg)
 
@@ -103,15 +103,15 @@ def query_handle():
         titles=["Match", "Problem", "%s Score" % handle, "Petr Score"],
         format=["%s", "%s", "%0.2f", "<b>%0.2f</b>"])
     pvpetr = pvpetr_summary + pvpetr_wins_table + pvpetr_losses_table
-  except: # TODO
-    error_msg = "Failed to read PvPetr for %s" % handle
+  except Exception, e: # TODO
+    error_msg = "Failed to read PvPetr for %s: %s" % (handle, e)
     app.logger.error(error_msg)
     flash(error_msg)
 
   try:
     asof = rating_functions.as_of(conn)
-  except: # TODO
-    error_msg = "Failed to read last match time"
+  except Exception, e: # TODO
+    error_msg = "Failed to read last match time: %s" % e
     app.logger.error(error_msg)
     flash(error_msg)
 
