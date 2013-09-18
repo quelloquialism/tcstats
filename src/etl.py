@@ -28,7 +28,7 @@ cursor = conn.cursor()
 def create_tables():
   try:
     cursor.executescript(open("schema.sql").read())
-  except Exception, e: # TODO
+  except Exception, e:
     log.error("Error executing schema.sql: %s" % e)
 
 def read_row(row):
@@ -55,7 +55,7 @@ def fetch_feeds(to_fetch):
         else:
           log.warn("Status code %s while fetching %s, retrying (%d of 5)" % \
               (re.status_code, url, i + 1))
-      except Exception, e: # TODO specific errors?
+      except Exception, e:
         log.warn("Caught error while fetching %s, retrying (%d of 5): %s" % \
             (url, i + 1, e))
       if success:
@@ -80,7 +80,7 @@ def load_files(files, table, extra_data=[]):
         if len(extra_data) > f:
           row_data.update(extra_data[f])
         data.append(row_data)
-    except Exception, e: # TODO what kind of errors can this throw? IO? Parse?
+    except Exception, e:
       log.error("Failed to parse %s: %s" % (filename, e))
     expected_keys = None
     for i in xrange(len(data)):
