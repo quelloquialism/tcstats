@@ -139,5 +139,6 @@ def full_run():
   create_tables()
   fetch_round_list()
   fetch_coder_list()
+  # TODO is there a way to fetch only rounds that need to be updated?
   round_ids = [row[0] for row in cursor.execute("SELECT round_id FROM rounds")]
   fetch_round_results(round_ids)
