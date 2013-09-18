@@ -83,22 +83,36 @@ def rating_color(rating, target=True):
     return "gray"
 
 def get_accomplishments(coder, limit):
+  rating = coder["alg_rating"]
+  country = coder["country_name"]
+  lang = coder["pref_language"]
   accomp = []
   accomp.append("Is %s coder (rating %d)" % (get_compliment(rating), rating))
-  accomp.append("Ranks %d overall" % get_ranking(coder))
+  accomp.append("Ranks %d overall" % get_ranking(rating))
   accomp.append("Ranks %d among coders from %s" % \
-      (get_ranking(coder, country=country), country))
+      (get_ranking(rating, country=country), country))
   accomp.append("Ranks %d among %s coders" % \
-      (get_ranking(coder, lang=lang), lang))
+      (get_ranking(rating, lang=lang), lang))
   accomp.append("Ranks %d among %s coders from %s" % \
-      (get_ranking(coder, lang=lang, country=country), lang, country))
+      (get_ranking(rating, lang=lang, country=country), lang, country))
   limit -= 5
   # TODO skipped participation accomp
   accomp.extend(get_round_accomplishments(coder, limit))
   return accomp
 
-def get_ranking(coder, country=None, lang=None):
-  return 0 # TODO
+def get_ranking(rating, country=None, lang=None):
+  select_sql = "SELECT COUNT(coder_id) FROM coders WHERE active = 1 AND " + \
+      "alg_rating > ?"
+  sql_args = [rating]
+  if country is not None:
+    select_sql += " AND country_name = ?"
+    sql_args.append(country)
+  if lang is not None:
+    # TODO my coders table has no pref_language
+    select_sql += " AND pref_language = ?"
+    sql_args.append(lang)
+  cursor = conn.cursor()
+  return cursor.execute(select_sql, sql_args).fetchone()[0]
 
 def get_round_accomplishments(coder, limit):
   return [] # TODO
