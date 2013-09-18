@@ -86,6 +86,7 @@ def get_accomplishments(coder, limit):
   rating = coder["alg_rating"]
   country = coder["country_name"]
   lang = coder["pref_language"]
+  participation = coder["participation"]
   accomp = []
   accomp.append("Is %s coder (rating %d)" % (get_compliment(rating), rating))
   accomp.append("Ranks %d overall" % get_ranking(rating))
@@ -95,8 +96,12 @@ def get_accomplishments(coder, limit):
       (get_ranking(rating, lang=lang), lang))
   accomp.append("Ranks %d among %s coders from %s" % \
       (get_ranking(rating, lang=lang, country=country), lang, country))
+  if participation > 0:
+    place = get_participation_ranking(participation)
+    accomp.append("Participated in %s of the last 30 SRMs (that's %s place)" % \
+        (participation, ordinal(place)))
+    limit -= 1
   limit -= 5
-  # TODO skipped participation accomp
   accomp.extend(get_round_accomplishments(coder, limit))
   return accomp
 
@@ -113,6 +118,12 @@ def get_ranking(rating, country=None, lang=None):
     sql_args.append(lang)
   cursor = conn.cursor()
   return cursor.execute(select_sql, sql_args).fetchone()[0]
+
+def get_participation_ranking(participation):
+  # TODO my coders table has no participation
+  select_sql = "SELECT COUNT(coder_id) FROM coders WHERE participation > ?"
+  cursor = conn.cursor()
+  return cursor.execute(select_sql, [participation]).fetchone()[0]
 
 def get_round_accomplishments(coder, limit):
   return [] # TODO
