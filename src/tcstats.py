@@ -56,6 +56,7 @@ def query_handle():
     handle = request.args["handle"]
     conn = get_db_conn()
     cur = conn.cursor()
+    # TODO this handle search needs to be case insensitive
     cid, rating = cur.execute("SELECT coder_id, alg_rating FROM coders " + \
         "WHERE handle = ?", [handle]).fetchone()
   except Exception, e:
@@ -69,6 +70,7 @@ def query_handle():
   compliment = ""
   
   try:
+    # TODO honor the rated flag
     fields = ",".join(("coder_id", "division", "division_placed", "new_rating",
         "new_vol", "old_rating", "room_placed", "round_id"))
     rounds = cur.execute(
