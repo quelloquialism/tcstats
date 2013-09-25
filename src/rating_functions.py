@@ -120,7 +120,6 @@ def get_ranking(rating, country=None, lang=None):
   return cursor.execute(select_sql, sql_args).fetchone()[0]
 
 def get_participation_ranking(participation):
-  # TODO my coders table has no participation
   select_sql = "SELECT COUNT(coder_id) FROM coders WHERE participation > ?"
   cursor = conn.cursor()
   return cursor.execute(select_sql, [participation]).fetchone()[0]

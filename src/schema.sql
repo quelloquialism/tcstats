@@ -26,7 +26,8 @@ CREATE TABLE coders (
   mar_rating integer,
   mar_vol integer,
   mar_num_ratings integer,
-  school text
+  school text,
+  participation integer
 );
 
 DROP TABLE IF EXISTS results;

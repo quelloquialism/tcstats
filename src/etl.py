@@ -136,6 +136,22 @@ def calculate_old_vol():
       vols[cid] = new_vol
   conn.commit()
 
+def calculate_participation():
+  participation = defaultdict(lambda: 0)
+  rounds_sql = "SELECT round_id FROM rounds WHERE " + \
+      "short_name LIKE \"%SRM%\" ORDER BY date DESC LIMIT 30"
+  # TODO should participation care about rated_flag?
+  coders_sql = "SELECT coder_id FROM results WHERE round_id = ?"
+  update_sql = "UPDATE coders SET participation = ? WHERE coder_id = ?"
+  round_ids = [row[0] for row in cursor.execute(rounds_sql)]
+  for rid in round_ids:
+    coders = [row[0] for row in cursor.execute(coders_sql, [rid])]
+    for cid in coders:
+      participation[cid] += 1
+  cursor.executemany(update_sql,
+      [(cid, participation[cid]) for cid in participation])
+  conn.commit()
+
 def full_run():
   create_tables()
   fetch_round_list()
