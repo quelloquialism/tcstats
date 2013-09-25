@@ -118,10 +118,10 @@ def fetch_round_results(round_ids):
     log.info("Finished loading %s round results" % len(fetched))
 
 def calculate_old_vol():
-  # TODO honor the rated flag
   vols = defaultdict(lambda: config["STARTING_VOL"])
   rounds_sql = "SELECT round_id FROM rounds ORDER BY date"
-  coders_sql = "SELECT coder_id FROM results WHERE round_id = ?"
+  coders_sql = "SELECT coder_id FROM results WHERE round_id = ? " + \
+      "AND rated_flag = 1"
   update_sql = "UPDATE results SET old_vol = ? " + \
       "WHERE coder_id = ? AND round_id = ?"
   new_vol_sql = "SELECT new_vol FROM results " + \

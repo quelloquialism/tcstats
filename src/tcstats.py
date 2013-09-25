@@ -70,11 +70,11 @@ def query_handle():
   compliment = ""
   
   try:
-    # TODO honor the rated flag
     fields = ",".join(("coder_id", "division", "division_placed", "new_rating",
         "new_vol", "old_rating", "room_placed", "round_id"))
     rounds = cur.execute(
-        "SELECT %s FROM results WHERE coder_id = ?" % fields, [cid]).fetchall()
+        "SELECT %s FROM results WHERE coder_id = ? AND rated_flag = 1" % fields,
+        [cid]).fetchall()
     num_rounds = len(rounds)
     round_ids = [row["round_id"] for row in rounds]
     round_names = cur.execute(

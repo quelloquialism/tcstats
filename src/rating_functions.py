@@ -133,7 +133,8 @@ def pvpetr(conn, user_cid, opp_cid=10574855):
   cids = [user_cid, opp_cid]
   fields = ",".join(["round_id", "division"] + \
       ["level_%s_final_points" % level for level in ("one", "two", "three")])
-  find_match_scores = "SELECT " + fields + " FROM results WHERE coder_id = ?"
+  find_match_scores = \
+      "SELECT %s FROM results WHERE coder_id = ? AND rated_flag = 1" % fields
   find_match_name = "SELECT short_name FROM rounds WHERE round_id = ?"
   matches = defaultdict(dict)
   for cid in cids:
