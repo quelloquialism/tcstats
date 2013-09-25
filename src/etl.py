@@ -159,3 +159,5 @@ def full_run():
   # TODO is there a way to fetch only rounds that need to be updated?
   round_ids = [row[0] for row in cursor.execute("SELECT round_id FROM rounds")]
   fetch_round_results(round_ids)
+  calculate_old_vol()
+  calculate_participation()
