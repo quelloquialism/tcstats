@@ -56,9 +56,9 @@ def query_handle():
     handle = request.args["handle"]
     conn = get_db_conn()
     cur = conn.cursor()
-    # TODO this handle search needs to be case insensitive
-    cid, rating = cur.execute("SELECT coder_id, alg_rating FROM coders " + \
-        "WHERE handle = ?", [handle]).fetchone()
+    handle, cid, rating = \
+        cur.execute("SELECT handle, coder_id, alg_rating FROM coders " + \
+        "WHERE LOWER(handle) = LOWER(?)", [handle]).fetchone()
   except Exception, e:
     flash("Could not find a user with handle '%s'." % handle)
     return render_template("landing.html", asof=rating_functions.as_of(conn))
