@@ -31,12 +31,14 @@ def create_tables():
   except Exception, e:
     log.error("Error executing schema.sql: %s" % e)
 
+# Parse out a single <row> element from TC xml into a dict
 def read_row(row):
   row_data = {}
   for child in row:
     row_data[child.tag] = child.text
   return row_data
 
+# Download a list of xml feeds from TC
 def fetch_feeds(to_fetch):
   fetched = []
   for (url, filename) in to_fetch:
@@ -117,6 +119,7 @@ def fetch_round_results(round_ids):
         [{"round_id": rid} for rid in round_ids])
     log.info("Finished loading %s round results" % len(fetched))
 
+# Populate old_vol for every round and coder
 def calculate_old_vol():
   vols = defaultdict(lambda: config["STARTING_VOL"])
   rounds_sql = "SELECT round_id FROM rounds ORDER BY date"
@@ -136,6 +139,8 @@ def calculate_old_vol():
       vols[cid] = new_vol
   conn.commit()
 
+# Populate participation for every coder
+# participation = # of matches played out of the last 30 (configurable)
 def calculate_participation(matches):
   participation = defaultdict(lambda: 0)
   rounds_sql = "SELECT round_id FROM rounds WHERE " + \
@@ -152,7 +157,10 @@ def calculate_participation(matches):
       [(participation[cid], cid) for cid in participation])
   conn.commit()
 
-def calculate_pref_language(matches):
+# Populate pref_language for every coder
+# pref_language = most used language from all time
+def calculate_pref_language():
+  # TODO should this be most recent N matches instead of all time?
   coders = {}
   # TODO should pref_language care about rated_flag?
   problem_levels = ["one", "two", "three"]
