@@ -49,7 +49,8 @@ def calc_new_rating_vol(user, rank, played, coders):
   return (new_rating, new_vol)
 
 def iterated_perf_as(coder_id, round_id, iterations=30):
-  dummy = {"old_rating": 1200, "old_vol": 337}
+  dummy = {"old_rating": config["STARTING_RATING"],
+      "old_vol": config["STARTING_VOL"]}
   rank = get_round_ranking(coder_id, round_id)
   coders = get_coders(round_id)
   for i in range(iterations):
