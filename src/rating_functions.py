@@ -113,7 +113,6 @@ def get_ranking(rating, country=None, lang=None):
     select_sql += " AND country_name = ?"
     sql_args.append(country)
   if lang is not None:
-    # TODO my coders table has no pref_language
     select_sql += " AND pref_language = ?"
     sql_args.append(lang)
   cursor = conn.cursor()

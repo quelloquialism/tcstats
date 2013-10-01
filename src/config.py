@@ -10,6 +10,7 @@ FETCH_TIMEOUT = 60 # seconds before failing
 FETCH_CHUNK_SIZE = 1024 # bytes per read
 FETCH_SLEEP = 1 # seconds between consecutive fetches
 ETL_SLEEP = 86400 # seconds between etl runs
+RECENT_MATCHES = 30 # how many matches to use for participation, etc.
 #TODO honor the etl sleep in the app
 ROUND_LIST_FILE = "/tmp/round_list.xml"
 ROUND_TABLE = "rounds"

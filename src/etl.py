@@ -136,10 +136,10 @@ def calculate_old_vol():
       vols[cid] = new_vol
   conn.commit()
 
-def calculate_participation():
+def calculate_participation(matches):
   participation = defaultdict(lambda: 0)
   rounds_sql = "SELECT round_id FROM rounds WHERE " + \
-      "short_name LIKE \"%SRM%\" ORDER BY date DESC LIMIT 30"
+      "short_name LIKE \"%SRM%\" ORDER BY date DESC LIMIT " + str(matches)
   # TODO should participation care about rated_flag?
   coders_sql = "SELECT coder_id FROM results WHERE round_id = ?"
   update_sql = "UPDATE coders SET participation = ? WHERE coder_id = ?"
@@ -149,7 +149,33 @@ def calculate_participation():
     for cid in coders:
       participation[cid] += 1
   cursor.executemany(update_sql,
-      [(cid, participation[cid]) for cid in participation])
+      [(participation[cid], cid) for cid in participation])
+  conn.commit()
+
+def calculate_pref_language(matches):
+  coders = {}
+  # TODO should pref_language care about rated_flag?
+  problem_levels = ["one", "two", "three"]
+  coders_sql = "SELECT coder_id, level_%s_language FROM results WHERE " + \
+      "level_%s_status = 'Passed System Test'"
+  update_sql = "UPDATE coders SET pref_language = ? WHERE coder_id = ?"
+  for level in problem_levels:
+    coder_langs = cursor.execute(coders_sql % (level, level))
+    for (cid, lang) in coder_langs:
+      if cid not in coders:
+        coders[cid] = defaultdict(lambda: 0)
+      coders[cid][lang] += 1
+  updates = []
+  for cid in coders:
+    most = 0
+    most_lang = ""
+    for lang in coders[cid]:
+      if coders[cid][lang] > most:
+        most = coders[cid][lang]
+        most_lang = lang
+    updates.append((most_lang, cid))
+  # TODO why not record the % usage of each language, rather than just the top?
+  cursor.executemany(update_sql, updates)
   conn.commit()
 
 def full_run():
@@ -160,4 +186,4 @@ def full_run():
   round_ids = [row[0] for row in cursor.execute("SELECT round_id FROM rounds")]
   fetch_round_results(round_ids)
   calculate_old_vol()
-  calculate_participation()
+  calculate_participation(config["RECENT_MATCHES"])
