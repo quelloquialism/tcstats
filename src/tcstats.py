@@ -14,7 +14,7 @@ import utils
 app = Flask(__name__)
 app.config.from_object("config")
 app.config.from_envvar("TCSTATS_SETTINGS", silent=True)
-app.secret_key = "not secret"
+app.secret_key = config["SECRET_KEY"]
 
 # TODO these imports must come after app.config is set up (circular deps)
 import rating_functions

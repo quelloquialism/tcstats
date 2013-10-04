@@ -5,11 +5,13 @@ LOG_BACKUPS = 365 # days before old logs are "rolled off" (deleted)
 LOG_FORMAT = \
     "%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d :: %(message)s"
 SQL_DB = "tc_data.db"
+SECRET_KEY = "not secret"
+ETL_ENABLED = True
+
 FETCH_RETRIES = 5 # attempts before failing
 FETCH_TIMEOUT = 60 # seconds before failing
 FETCH_CHUNK_SIZE = 1024 # bytes per read
 FETCH_SLEEP = 1 # seconds between consecutive fetches
-ETL_ENABLED = True
 ETL_SLEEP = 86400 # seconds between etl runs
 RECENT_MATCHES = 30 # how many matches to use for participation, etc.
 ROUND_LIST_FILE = "/tmp/round_list.xml"
