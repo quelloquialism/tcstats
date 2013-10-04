@@ -7,6 +7,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 import os.path
 import sqlite3
+import threading
 
 import utils
 
@@ -15,8 +16,9 @@ app.config.from_object("config")
 app.config.from_envvar("TCSTATS_SETTINGS", silent=True)
 app.secret_key = "not secret"
 
-# this import must come after app.config is set up
+# TODO these imports must come after app.config is set up (circular deps)
 import rating_functions
+import etl
 
 log_fhandler = TimedRotatingFileHandler(os.path.join(app.config["LOG_DIR"],
     "app"), backupCount=app.config["LOG_BACKUPS"], when="midnight",
@@ -126,3 +128,6 @@ def query_handle():
 
 if __name__ == "__main__":
   app.run()
+  if config["ETL_ENABLED"]:
+    t = threading.Thread(target=etl.controller)
+    t.start()

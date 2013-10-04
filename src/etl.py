@@ -195,3 +195,12 @@ def full_run():
   fetch_round_results(round_ids)
   calculate_old_vol()
   calculate_participation(config["RECENT_MATCHES"])
+
+def controller():
+  while True:
+    try:
+      full_run()
+    except Exception, e:
+      error_msg = "ETL failed: %s" % e
+      app.logger.error(error_msg)
+    time.sleep(config["ETL_SLEEP"])
