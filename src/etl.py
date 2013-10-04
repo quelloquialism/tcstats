@@ -22,8 +22,8 @@ log.setLevel(logging.DEBUG if config["DEBUG"] else logging.INFO)
 log_fhandler.setFormatter(log_fmt)
 log_fhandler.setLevel(logging.DEBUG if config["DEBUG"] else logging.INFO)
 
-conn = sqlite3.connect(config["SQL_DB"])
-cursor = conn.cursor()
+conn = None
+cursor = None
 
 def create_tables():
   try:
@@ -197,6 +197,8 @@ def full_run():
   calculate_participation(config["RECENT_MATCHES"])
 
 def controller():
+  conn = sqlite3.connect(config["SQL_DB"])
+  cursor = conn.cursor()
   while True:
     try:
       full_run()
