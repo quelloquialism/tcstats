@@ -1,33 +1,15 @@
 #!/usr/bin/python
 
-from flask import Flask, flash, g, render_template, request, url_for
+from flask import flash, g, render_template, request, url_for
 # TODO only import what is used in the end
 from flask import session, redirect, abort
-import logging
-from logging.handlers import TimedRotatingFileHandler
-import os.path
 import sqlite3
 import threading
 
-import utils
-
-app = Flask(__name__)
-app.config.from_object("config")
-app.config.from_envvar("TCSTATS_SETTINGS", silent=True)
-app.secret_key = config["SECRET_KEY"]
-
-# TODO these imports must come after app.config is set up (circular deps)
+from app_provider import app
 import rating_functions
 import etl
-
-log_fhandler = TimedRotatingFileHandler(os.path.join(app.config["LOG_DIR"],
-    "app"), backupCount=app.config["LOG_BACKUPS"], when="midnight",
-    interval=1, utc=True)
-log_fmt = logging.Formatter(app.config["LOG_FORMAT"])
-app.logger.addHandler(log_fhandler)
-app.logger.setLevel(logging.DEBUG if app.config["DEBUG"] else logging.INFO)
-log_fhandler.setFormatter(log_fmt)
-log_fhandler.setLevel(logging.DEBUG if app.config["DEBUG"] else logging.INFO)
+import utils
 
 def get_db_conn():
   conn = getattr(g, "conn", None)
@@ -128,6 +110,6 @@ def query_handle():
 
 if __name__ == "__main__":
   app.run()
-  if config["ETL_ENABLED"]:
+  if app.config["ETL_ENABLED"]:
     t = threading.Thread(target=etl.controller)
     t.start()

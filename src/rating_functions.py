@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
-from tcstats import app
-
 from collections import defaultdict
+
+from app_provider import app
 
 config = app.config
 

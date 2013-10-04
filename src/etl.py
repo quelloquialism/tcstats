@@ -1,5 +1,3 @@
-from tcstats import app
-
 from collections import defaultdict
 import logging
 from logging.handlers import TimedRotatingFileHandler
@@ -9,6 +7,8 @@ import sqlite3
 import time
 import urllib
 import xml.etree.cElementTree as ET
+
+from app_provider import app
 
 config = app.config
 
